@@ -1,13 +1,13 @@
 /**
  * SOCADEL Reporting Portal - Master JavaScript
- * Handles navigation tree interactions, search, fullscreen, refresh simulation, user menu & admin modals
+ * Handles navigation tree, enhanced search with highlighting & instant dropdown,
+ * workspace actions, chart micro-interactions, and admin features.
  */
 
 document.addEventListener('DOMContentLoaded', function () {
     initTreeNavigation();
     initSearchFilter();
     initActionButtons();
-    initUserMenu();
     initChartInteractions();
     initAdminFeatures();
 });
@@ -38,70 +38,225 @@ function initTreeNavigation() {
         });
     });
 
-    // Ensure active item and its parents are expanded on load
+    // Ensure active item and all its ancestors are expanded on load
     const activeReport = document.querySelector('.tree-report-link.active');
     if (activeReport) {
-        let parent = activeReport.parentElement;
-        while (parent && !parent.classList.contains('sidebar-nav-container')) {
-            if (parent.classList.contains('collapsed')) {
-                parent.classList.remove('collapsed');
-            }
-            parent = parent.parentElement;
-        }
+        let parent = activeReport.closest('.tree-level-2-item');
+        if (parent) parent.classList.remove('collapsed');
+        let grandParent = activeReport.closest('.tree-level-1-item');
+        if (grandParent) grandParent.classList.remove('collapsed');
     }
 }
 
 /* ==========================================================================
-   2. Search Filtering (Sidebar & Header)
+   2. Enhanced Search Filtering (Sidebar & Header Live Search)
    ========================================================================== */
 function initSearchFilter() {
-    const sidebarSearchInput = document.getElementById('sidebarSearchInput');
-    const headerSearchInput = document.getElementById('headerSearchInput');
+    const sidebarInput = document.getElementById('sidebarSearchInput');
+    const sidebarClear = document.getElementById('sidebarSearchClear');
+    const sidebarBadge = document.getElementById('sidebarSearchBadge');
 
-    function filterTree(query) {
-        query = (query || '').trim().toLowerCase();
-        const reportLinks = document.querySelectorAll('.tree-report-link');
+    const headerInput = document.getElementById('headerSearchInput');
+    const headerClear = document.getElementById('headerSearchClear');
+    const headerResults = document.getElementById('headerSearchResults');
+
+    function performTreeSearch(query) {
+        const term = (query || '').trim().toLowerCase();
+        const reportItems = document.querySelectorAll('.tree-level-3-item');
         const subItems = document.querySelectorAll('.tree-level-2-item');
         const catItems = document.querySelectorAll('.tree-level-1-item');
 
-        if (!query) {
-            // Reset visibility
-            document.querySelectorAll('.tree-level-1-item, .tree-level-2-item, .tree-level-3-item').forEach(el => {
-                el.style.display = '';
+        if (sidebarClear) sidebarClear.style.display = term ? 'flex' : 'none';
+        if (headerClear) headerClear.style.display = term ? 'flex' : 'none';
+
+        if (!term) {
+            // Reset tree view
+            if (sidebarBadge) sidebarBadge.style.display = 'none';
+
+            reportItems.forEach(item => {
+                item.style.display = '';
+                const link = item.querySelector('.report-link-text');
+                if (link && link.getAttribute('data-original')) {
+                    link.innerHTML = link.getAttribute('data-original');
+                }
             });
+
+            subItems.forEach(item => {
+                item.style.display = '';
+            });
+
+            catItems.forEach(item => {
+                item.style.display = '';
+            });
+
             return;
         }
 
-        // Search through reports and subcategories
-        reportLinks.forEach(link => {
-            const title = (link.getAttribute('data-title') || link.textContent).toLowerCase();
-            const parentItem = link.closest('.tree-level-3-item');
-            if (title.includes(query)) {
-                parentItem.style.display = '';
-                // Ensure parents are visible and expanded
-                let p = parentItem.parentElement;
-                while (p && !p.classList.contains('sidebar-nav-container')) {
-                    if (p.classList.contains('collapsed')) {
-                        p.classList.remove('collapsed');
-                    }
-                    p.style.display = '';
-                    p = p.parentElement;
+        let matchCount = 0;
+
+        reportItems.forEach(item => {
+            const link = item.querySelector('.tree-report-link');
+            const textSpan = item.querySelector('.report-link-text');
+            if (!link || !textSpan) return;
+
+            if (!textSpan.hasAttribute('data-original')) {
+                textSpan.setAttribute('data-original', textSpan.textContent);
+            }
+
+            const rawText = textSpan.getAttribute('data-original') || textSpan.textContent;
+            const fullDataTitle = (item.getAttribute('data-title') || rawText).toLowerCase();
+
+            if (fullDataTitle.includes(term)) {
+                matchCount++;
+                item.style.display = '';
+
+                // Highlight matched portion
+                const regex = new RegExp(`(${escapeRegex(term)})`, 'gi');
+                textSpan.innerHTML = rawText.replace(regex, '<mark class="search-highlight">$1</mark>');
+
+                // Auto-expand and reveal parents
+                let sub = item.closest('.tree-level-2-item');
+                if (sub) {
+                    sub.classList.remove('collapsed');
+                    sub.style.display = '';
+                }
+
+                let cat = item.closest('.tree-level-1-item');
+                if (cat) {
+                    cat.classList.remove('collapsed');
+                    cat.style.display = '';
                 }
             } else {
-                parentItem.style.display = 'none';
+                item.style.display = 'none';
+                textSpan.innerHTML = rawText;
+            }
+        });
+
+        // Hide empty subcategories and categories
+        subItems.forEach(sub => {
+            const hasVisibleReports = sub.querySelectorAll('.tree-level-3-item:not([style*="display: none"])').length > 0;
+            if (!hasVisibleReports) {
+                sub.style.display = 'none';
+            }
+        });
+
+        catItems.forEach(cat => {
+            const hasVisibleSubs = cat.querySelectorAll('.tree-level-2-item:not([style*="display: none"])').length > 0;
+            if (!hasVisibleSubs) {
+                cat.style.display = 'none';
+            }
+        });
+
+        // Update badge
+        if (sidebarBadge) {
+            sidebarBadge.style.display = 'block';
+            if (matchCount === 0) {
+                sidebarBadge.textContent = 'Aucun résultat trouvé';
+                sidebarBadge.style.backgroundColor = '#FFEBEE';
+                sidebarBadge.style.color = '#C62828';
+            } else {
+                sidebarBadge.textContent = `${matchCount} rapport${matchCount > 1 ? 's' : ''} trouvé${matchCount > 1 ? 's' : ''}`;
+                sidebarBadge.style.backgroundColor = 'var(--socadel-blue-light)';
+                sidebarBadge.style.color = 'var(--socadel-blue-dark)';
+            }
+        }
+    }
+
+    function updateHeaderDropdown(query) {
+        if (!headerResults) return;
+        const term = (query || '').trim().toLowerCase();
+
+        if (!term) {
+            headerResults.style.display = 'none';
+            headerResults.innerHTML = '';
+            return;
+        }
+
+        const reportLinks = document.querySelectorAll('.tree-report-link');
+        const matches = [];
+
+        reportLinks.forEach(link => {
+            const id = link.getAttribute('data-id');
+            const dataTitle = link.getAttribute('data-title') || link.textContent.trim();
+            const text = link.querySelector('.report-link-text')?.textContent.trim() || link.textContent.trim();
+            
+            const subTitle = link.closest('.tree-level-2-item')?.getAttribute('data-title') || '';
+            const catTitle = link.closest('.tree-level-1-item')?.getAttribute('data-title') || '';
+
+            if (dataTitle.toLowerCase().includes(term) || catTitle.toLowerCase().includes(term)) {
+                matches.push({ id, title: text, path: `${catTitle} › ${subTitle}` });
+            }
+        });
+
+        if (matches.length === 0) {
+            headerResults.innerHTML = '<div class="search-result-empty">Aucun rapport correspondant</div>';
+        } else {
+            headerResults.innerHTML = matches.slice(0, 6).map(m => `
+                <a href="/?report=${m.id}" class="search-result-item">
+                    <span class="search-result-title">${escapeHtml(m.title)}</span>
+                    <span class="search-result-path">${escapeHtml(m.path)}</span>
+                </a>
+            `).join('');
+        }
+
+        headerResults.style.display = 'block';
+    }
+
+    function escapeRegex(string) {
+        return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Sidebar Search Listeners
+    if (sidebarInput) {
+        sidebarInput.addEventListener('input', function () {
+            if (headerInput) headerInput.value = this.value;
+            performTreeSearch(this.value);
+        });
+    }
+
+    if (sidebarClear) {
+        sidebarClear.addEventListener('click', function () {
+            if (sidebarInput) sidebarInput.value = '';
+            if (headerInput) headerInput.value = '';
+            performTreeSearch('');
+            if (sidebarInput) sidebarInput.focus();
+        });
+    }
+
+    // Header Search Listeners
+    if (headerInput) {
+        headerInput.addEventListener('input', function () {
+            if (sidebarInput) sidebarInput.value = this.value;
+            performTreeSearch(this.value);
+            updateHeaderDropdown(this.value);
+        });
+
+        headerInput.addEventListener('focus', function () {
+            if (this.value.trim()) {
+                updateHeaderDropdown(this.value);
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (headerResults && !headerResults.contains(e.target) && e.target !== headerInput) {
+                headerResults.style.display = 'none';
             }
         });
     }
 
-    if (sidebarSearchInput) {
-        sidebarSearchInput.addEventListener('input', function () {
-            filterTree(this.value);
-        });
-    }
-
-    if (headerSearchInput) {
-        headerSearchInput.addEventListener('input', function () {
-            filterTree(this.value);
+    if (headerClear) {
+        headerClear.addEventListener('click', function () {
+            if (headerInput) headerInput.value = '';
+            if (sidebarInput) sidebarInput.value = '';
+            performTreeSearch('');
+            updateHeaderDropdown('');
+            if (headerInput) headerInput.focus();
         });
     }
 }
@@ -137,7 +292,6 @@ function initActionButtons() {
             const icon = this.querySelector('svg') || this;
             icon.classList.add('rotating');
             
-            // Simulate reload / refresh
             setTimeout(() => {
                 icon.classList.remove('rotating');
             }, 650);
@@ -145,38 +299,35 @@ function initActionButtons() {
     }
 }
 
-/* ==========================================================================
-   4. User Menu Dropdown
-   ========================================================================== */
-function initUserMenu() {
-    const userSection = document.getElementById('headerUserSection');
-    const userDropdown = document.getElementById('userDropdownMenu');
+// Global retry action for error simulation
+window.retryReportLoading = function (btn) {
+    if (!btn) return;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `
+        <svg class="rotating" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19"></path>
+        </svg>
+        <span>Tentative de reconnexion...</span>
+    `;
+    btn.disabled = true;
 
-    if (userSection && userDropdown) {
-        userSection.addEventListener('click', function (e) {
-            e.stopPropagation();
-            userDropdown.classList.toggle('show');
-        });
-
-        document.addEventListener('click', function (e) {
-            if (!userDropdown.contains(e.target) && !userSection.contains(e.target)) {
-                userDropdown.classList.remove('show');
-            }
-        });
-    }
-}
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        alert("La tentative de connexion à la source de données a échoué (serveur distant indisponible). Veuillez contacter l'administrateur système.");
+    }, 1200);
+};
 
 /* ==========================================================================
-   5. Chart Tooltips & Micro-Interactions
+   4. Chart Micro-Interactions & Tooltips
    ========================================================================== */
 function initChartInteractions() {
     const tooltip = document.createElement('div');
     tooltip.className = 'chart-tooltip';
     document.body.appendChild(tooltip);
 
-    // Bars hover
     document.querySelectorAll('.v-bar, .h-bar').forEach(bar => {
-        bar.addEventListener('mouseenter', function (e) {
+        bar.addEventListener('mouseenter', function () {
             const val = this.getAttribute('data-val') || 'Donnée';
             const label = this.getAttribute('data-label') || '';
             tooltip.innerHTML = `<strong>${label}</strong>: ${val}`;
@@ -184,8 +335,8 @@ function initChartInteractions() {
         });
 
         bar.addEventListener('mousemove', function (e) {
-            tooltip.style.left = (e.pageX + 10) + 'px';
-            tooltip.style.top = (e.pageY - 25) + 'px';
+            tooltip.style.left = (e.pageX + 12) + 'px';
+            tooltip.style.top = (e.pageY - 28) + 'px';
         });
 
         bar.addEventListener('mouseleave', function () {
@@ -195,25 +346,30 @@ function initChartInteractions() {
 }
 
 /* ==========================================================================
-   6. Administration Features (Modals & Filtering)
+   5. Administration Features (Modals & Filtering)
    ========================================================================== */
 function initAdminFeatures() {
     const adminSearch = document.getElementById('adminTableSearch');
     const adminTypeFilter = document.getElementById('adminTypeFilter');
+    const adminStatusFilter = document.getElementById('adminStatusFilter');
 
     function filterAdminTable() {
-        if (!adminSearch && !adminTypeFilter) return;
+        if (!adminSearch && !adminTypeFilter && !adminStatusFilter) return;
         const query = adminSearch ? adminSearch.value.toLowerCase().trim() : '';
         const selectedType = adminTypeFilter ? adminTypeFilter.value : '';
+        const selectedStatus = adminStatusFilter ? adminStatusFilter.value : '';
 
         const rows = document.querySelectorAll('.admin-table tbody tr');
         rows.forEach(row => {
             const title = (row.getAttribute('data-title') || '').toLowerCase();
             const level = row.getAttribute('data-level') || '';
+            const status = row.getAttribute('data-status') || '';
+
             const matchesText = !query || title.includes(query);
             const matchesType = !selectedType || level === selectedType;
+            const matchesStatus = !selectedStatus || status === selectedStatus;
 
-            if (matchesText && matchesType) {
+            if (matchesText && matchesType && matchesStatus) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
@@ -226,6 +382,9 @@ function initAdminFeatures() {
     }
     if (adminTypeFilter) {
         adminTypeFilter.addEventListener('change', filterAdminTable);
+    }
+    if (adminStatusFilter) {
+        adminStatusFilter.addEventListener('change', filterAdminTable);
     }
 }
 
@@ -244,24 +403,18 @@ window.closeAdminModal = function (modalId) {
     }
 };
 
-window.openEditModal = function (id, title, parentId, type, order, engine, description) {
-    document.getElementById('editItemId').value = id || '';
-    document.getElementById('editItemTitle').value = title || '';
-    document.getElementById('editItemParentId').value = parentId || '';
-    document.getElementById('editItemType').value = type || '3';
-    document.getElementById('editItemOrder').value = order || '1';
-    document.getElementById('editItemEngine').value = engine || 'PowerBI';
-    document.getElementById('editItemDescription').value = description || '';
-
-    window.openAdminModal('modalEditItem');
-};
-
 window.openAddChildModal = function (parentId, parentLevel) {
-    const nextType = parentLevel == '1' ? '2' : '3';
-    document.getElementById('addItemParentId').value = parentId || '';
-    document.getElementById('addItemType').value = nextType;
+    const nextLevel = parentLevel == '1' ? '2' : '3';
+    document.getElementById('addItemType').value = nextLevel;
     document.getElementById('addItemTitle').value = '';
+    document.getElementById('addItemCode').value = '';
     document.getElementById('addItemDescription').value = '';
-    
+    document.getElementById('addItemOrder').value = '1';
+
+    if (window.toggleAddParentSelector) {
+        window.toggleAddParentSelector();
+    }
+    document.getElementById('addItemParentId').value = parentId || '';
+
     window.openAdminModal('modalAddItem');
 };

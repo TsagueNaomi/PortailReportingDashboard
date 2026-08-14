@@ -22,6 +22,9 @@ namespace PortailSocadel.Pages.Admin
         public int TotalCategories { get; set; }
         public int TotalSubCategories { get; set; }
         public int TotalReports { get; set; }
+        public int TotalPowerBI { get; set; }
+        public int TotalSSRS { get; set; }
+        public int TotalExcel { get; set; }
 
         [BindProperty]
         public MenuItem ItemInput { get; set; } = new();
@@ -46,6 +49,10 @@ namespace PortailSocadel.Pages.Admin
             TotalSubCategories = FlatItems.Count(i => i.Type == ItemType.SubCategory);
             TotalReports = FlatItems.Count(i => i.Type == ItemType.Report);
 
+            TotalPowerBI = FlatItems.Count(i => i.Type == ItemType.Report && i.Engine == ReportEngine.PowerBI);
+            TotalSSRS = FlatItems.Count(i => i.Type == ItemType.Report && i.Engine == ReportEngine.SSRS);
+            TotalExcel = FlatItems.Count(i => i.Type == ItemType.Report && i.Engine == ReportEngine.Excel);
+
             CategoryOptions = FlatItems.Where(i => i.Type == ItemType.Category).OrderBy(i => i.Order).ToList();
             SubCategoryOptions = FlatItems.Where(i => i.Type == ItemType.SubCategory).OrderBy(i => i.Order).ToList();
         }
@@ -65,7 +72,7 @@ namespace PortailSocadel.Pages.Admin
             }
 
             _navService.AddItem(ItemInput);
-            SuccessMessage = $"L'élément « {ItemInput.Title} » a été ajouté avec succès.";
+            SuccessMessage = $"L'élément « {ItemInput.Title} » a été ajouté avec succès dans l'arborescence.";
             return RedirectToPage();
         }
 
@@ -109,7 +116,7 @@ namespace PortailSocadel.Pages.Admin
             bool deleted = _navService.DeleteItem(id);
             if (deleted)
             {
-                SuccessMessage = $"L'élément « {title} » et ses éventuels sous-éléments ont été supprimés.";
+                SuccessMessage = $"L'élément « {title} » et ses éventuels sous-éléments ont été supprimés avec succès.";
             }
             else
             {
@@ -122,7 +129,7 @@ namespace PortailSocadel.Pages.Admin
         public IActionResult OnPostReset()
         {
             _navService.ResetToDefault();
-            SuccessMessage = "L'arborescence a été réinitialisée avec les données par défaut de SOCADEL.";
+            SuccessMessage = "L'arborescence complète a été réinitialisée avec les paramètres d'usine de SOCADEL.";
             return RedirectToPage();
         }
     }

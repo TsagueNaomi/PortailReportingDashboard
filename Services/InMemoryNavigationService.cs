@@ -18,7 +18,9 @@ namespace PortailSocadel.Services
             {
                 _items.Clear();
 
-                // 1. Commercial (Level 1)
+                // =============================================================
+                // 1. DIRECTION COMMERCIALE (Level 1)
+                // =============================================================
                 var commercial = new MenuItem
                 {
                     Id = "menu-commercial",
@@ -26,7 +28,8 @@ namespace PortailSocadel.Services
                     Type = ItemType.Category,
                     Order = 1,
                     IsActive = true,
-                    Description = "Direction Commerciale et Clientèle"
+                    Code = "DIR-COMM",
+                    Description = "Direction Commerciale et Gestion de la Clientèle"
                 };
                 _items.Add(commercial);
 
@@ -39,11 +42,32 @@ namespace PortailSocadel.Services
                     Type = ItemType.SubCategory,
                     Order = 1,
                     IsActive = true,
-                    Description = "Suivi des paiements et des caisses"
+                    Code = "ENC",
+                    Description = "Suivi des encaissements, caisses et modes de paiement"
                 };
                 _items.Add(encaissement);
-                _items.Add(new MenuItem { Id = "rep-enc-a", Title = "Rapport A", ParentId = encaissement.Id, Type = ItemType.Report, Order = 1, Engine = ReportEngine.PowerBI, Description = "Synthèse des encaissements par agence" });
-                _items.Add(new MenuItem { Id = "rep-enc-b", Title = "Rapport B", ParentId = encaissement.Id, Type = ItemType.Report, Order = 2, Engine = ReportEngine.PowerBI, Description = "Détail journalier des modes de paiement" });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-enc-synth", 
+                    Title = "Synthèse journalière des encaissements", 
+                    ParentId = encaissement.Id, 
+                    Type = ItemType.Report, 
+                    Order = 1, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-ENC-01",
+                    Description = "Suivi quotidien des flux de caisse, dépôts bancaires et ventilations par agence" 
+                });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-enc-modes", 
+                    Title = "Répartition par mode de règlement", 
+                    ParentId = encaissement.Id, 
+                    Type = ItemType.Report, 
+                    Order = 2, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-ENC-02",
+                    Description = "Analyse des règlements par espèces, virements, cartes et mobile money" 
+                });
 
                 // 1.2 Facturation
                 var facturation = new MenuItem
@@ -54,11 +78,32 @@ namespace PortailSocadel.Services
                     Type = ItemType.SubCategory,
                     Order = 2,
                     IsActive = true,
-                    Description = "Gestion des émissions de factures"
+                    Code = "FAC",
+                    Description = "Gestion des émissions de factures et volumes d'énergie"
                 };
                 _items.Add(facturation);
-                _items.Add(new MenuItem { Id = "rep-fac-a", Title = "Rapport A", ParentId = facturation.Id, Type = ItemType.Report, Order = 1, Engine = ReportEngine.PowerBI, Description = "Tableau de bord facturation mensuelle" });
-                _items.Add(new MenuItem { Id = "rep-fac-b", Title = "Rapport B", ParentId = facturation.Id, Type = ItemType.Report, Order = 2, Engine = ReportEngine.PowerBI, Description = "Analyse des volumes et tranches tarifaires" });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-fac-mensuel", 
+                    Title = "Suivi mensuel de facturation", 
+                    ParentId = facturation.Id, 
+                    Type = ItemType.Report, 
+                    Order = 1, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-FAC-01",
+                    Description = "Volumes d'énergie facturés, montants HT/TTC et analyse comparative M-1" 
+                });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-fac-grands-comptes", 
+                    Title = "Portefeuille grands comptes & industriels", 
+                    ParentId = facturation.Id, 
+                    Type = ItemType.Report, 
+                    Order = 2, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-FAC-02",
+                    Description = "Facturation haute tension et suivi des gros consommateurs" 
+                });
 
                 // 1.3 Recouvrement
                 var recouvrement = new MenuItem
@@ -69,11 +114,32 @@ namespace PortailSocadel.Services
                     Type = ItemType.SubCategory,
                     Order = 3,
                     IsActive = true,
-                    Description = "Suivi des impayés et relances"
+                    Code = "REC",
+                    Description = "Suivi des impayés, balance âgée et contentieux"
                 };
                 _items.Add(recouvrement);
-                _items.Add(new MenuItem { Id = "rep-rec-a", Title = "Rapport A", ParentId = recouvrement.Id, Type = ItemType.Report, Order = 1, Engine = ReportEngine.PowerBI, Description = "Tableau de bord de recouvrement commercial" });
-                _items.Add(new MenuItem { Id = "rep-rec-b", Title = "Rapport B", ParentId = recouvrement.Id, Type = ItemType.Report, Order = 2, Engine = ReportEngine.PowerBI, Description = "Balance âgée et actions contentieuses" });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-rec-taux", 
+                    Title = "Taux de recouvrement & balance âgée", 
+                    ParentId = recouvrement.Id, 
+                    Type = ItemType.Report, 
+                    Order = 1, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-REC-01",
+                    Description = "Tableau de bord de recouvrement commercial et balance âgée des créances" 
+                });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-rec-contentieux", 
+                    Title = "Dossiers en contentieux & relances", 
+                    ParentId = recouvrement.Id, 
+                    Type = ItemType.Report, 
+                    Order = 2, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-REC-02",
+                    Description = "Suivi des créances contentieuses et actions juridiques" 
+                });
 
                 // 1.4 Abonnement
                 var abonnement = new MenuItem
@@ -84,11 +150,32 @@ namespace PortailSocadel.Services
                     Type = ItemType.SubCategory,
                     Order = 4,
                     IsActive = true,
+                    Code = "ABO",
                     Description = "Contrats et parcs d'abonnés"
                 };
                 _items.Add(abonnement);
-                _items.Add(new MenuItem { Id = "rep-abo-a", Title = "Rapport A", ParentId = abonnement.Id, Type = ItemType.Report, Order = 1, Engine = ReportEngine.PowerBI, Description = "Statistiques sur les nouvelles souscriptions" });
-                _items.Add(new MenuItem { Id = "rep-abo-b", Title = "Rapport B", ParentId = abonnement.Id, Type = ItemType.Report, Order = 2, Engine = ReportEngine.PowerBI, Description = "Taux de résiliation et réabonnements" });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-abo-parc", 
+                    Title = "Parc abonnés & nouvelles souscriptions", 
+                    ParentId = abonnement.Id, 
+                    Type = ItemType.Report, 
+                    Order = 1, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-ABO-01",
+                    Description = "Statistiques sur les souscriptions actives par catégorie tarifaire" 
+                });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-abo-resiliations", 
+                    Title = "Taux de résiliation & réabonnements", 
+                    ParentId = abonnement.Id, 
+                    Type = ItemType.Report, 
+                    Order = 2, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-ABO-02",
+                    Description = "Analyse des motifs de résiliation et réactivations" 
+                });
 
                 // 1.5 Suivi des compteurs
                 var compteurs = new MenuItem
@@ -99,11 +186,34 @@ namespace PortailSocadel.Services
                     Type = ItemType.SubCategory,
                     Order = 5,
                     IsActive = true,
-                    Description = "Parc de compteurs et relèves"
+                    Code = "CPT",
+                    Description = "Parc de compteurs, relèves et détection d'anomalies"
                 };
                 _items.Add(compteurs);
-                _items.Add(new MenuItem { Id = "rep-cpt-a", Title = "Rapport A", ParentId = compteurs.Id, Type = ItemType.Report, Order = 1, Engine = ReportEngine.PowerBI, Description = "Anomalies d'index et relèves bloquées" });
-                _items.Add(new MenuItem { Id = "rep-cpt-b", Title = "Rapport B", ParentId = compteurs.Id, Type = ItemType.Report, Order = 2, Engine = ReportEngine.PowerBI, Description = "Campagnes de remplacement de compteurs" });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-cpt-parc", 
+                    Title = "Inventaire du parc compteurs", 
+                    ParentId = compteurs.Id, 
+                    Type = ItemType.Report, 
+                    Order = 1, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-CPT-01",
+                    Description = "Statut du parc de compteurs électromécaniques, électroniques et communicants" 
+                });
+                // Simulated Error Report for realistic demonstration directly in the navigation menu (Point 3)
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-cpt-anomalies", 
+                    Title = "Anomalies de relève & compteurs bloqués", 
+                    ParentId = compteurs.Id, 
+                    Type = ItemType.Report, 
+                    Order = 2, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-CPT-02",
+                    SimulateError = true, // Triggers error state in realistic navigation
+                    Description = "Détection des index incohérents, compteurs bloqués et tentatives de fraude" 
+                });
 
                 // 1.6 Branchement
                 var branchement = new MenuItem
@@ -114,13 +224,36 @@ namespace PortailSocadel.Services
                     Type = ItemType.SubCategory,
                     Order = 6,
                     IsActive = true,
+                    Code = "BRA",
                     Description = "Raccordements au réseau électrique"
                 };
                 _items.Add(branchement);
-                _items.Add(new MenuItem { Id = "rep-bra-a", Title = "Rapport A", ParentId = branchement.Id, Type = ItemType.Report, Order = 1, Engine = ReportEngine.PowerBI, Description = "Délais de raccordement des nouveaux abonnés" });
-                _items.Add(new MenuItem { Id = "rep-bra-b", Title = "Rapport B", ParentId = branchement.Id, Type = ItemType.Report, Order = 2, Engine = ReportEngine.PowerBI, Description = "Devis et travaux de branchement exécutés" });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-bra-delais", 
+                    Title = "Délais d'instruction des raccordements", 
+                    ParentId = branchement.Id, 
+                    Type = ItemType.Report, 
+                    Order = 1, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-BRA-01",
+                    Description = "Temps moyen d'instruction des demandes et délais de raccordement" 
+                });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-bra-travaux", 
+                    Title = "Suivi des chantiers & travaux réseau", 
+                    ParentId = branchement.Id, 
+                    Type = ItemType.Report, 
+                    Order = 2, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-BRA-02",
+                    Description = "Avancement des devis et travaux de branchement exécutés" 
+                });
 
-                // 2. Finance (Level 1)
+                // =============================================================
+                // 2. DIRECTION FINANCIÈRE (Level 1)
+                // =============================================================
                 var finance = new MenuItem
                 {
                     Id = "menu-finance",
@@ -128,6 +261,7 @@ namespace PortailSocadel.Services
                     Type = ItemType.Category,
                     Order = 2,
                     IsActive = true,
+                    Code = "DIR-FIN",
                     Description = "Direction Financière et Comptable"
                 };
                 _items.Add(finance);
@@ -141,10 +275,32 @@ namespace PortailSocadel.Services
                     Type = ItemType.SubCategory,
                     Order = 1,
                     IsActive = true,
+                    Code = "TRE",
                     Description = "Flux de trésorerie et comptes bancaires"
                 };
                 _items.Add(tresorerie);
-                _items.Add(new MenuItem { Id = "rep-tre-a", Title = "Rapport A", ParentId = tresorerie.Id, Type = ItemType.Report, Order = 1, Engine = ReportEngine.PowerBI, Description = "Position quotidienne de trésorerie" });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-tre-position", 
+                    Title = "Position quotidienne de trésorerie", 
+                    ParentId = tresorerie.Id, 
+                    Type = ItemType.Report, 
+                    Order = 1, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-TRE-01",
+                    Description = "Solde consolidé des comptes bancaires, encaissements et décaissements du jour" 
+                });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-tre-previsions", 
+                    Title = "Prévisions des flux à court terme", 
+                    ParentId = tresorerie.Id, 
+                    Type = ItemType.Report, 
+                    Order = 2, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-TRE-02",
+                    Description = "Modélisation des encaissements et décaissements prévisionnels à 30 jours" 
+                });
 
                 // 2.2 Budget
                 var budget = new MenuItem
@@ -155,10 +311,32 @@ namespace PortailSocadel.Services
                     Type = ItemType.SubCategory,
                     Order = 2,
                     IsActive = true,
-                    Description = "Suivi budgétaire et engagements"
+                    Code = "BUD",
+                    Description = "Suivi budgétaire et engagements par direction"
                 };
                 _items.Add(budget);
-                _items.Add(new MenuItem { Id = "rep-bud-a", Title = "Rapport A", ParentId = budget.Id, Type = ItemType.Report, Order = 1, Engine = ReportEngine.PowerBI, Description = "Exécution budgétaire par département" });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-bud-execution", 
+                    Title = "Exécution budgétaire par direction", 
+                    ParentId = budget.Id, 
+                    Type = ItemType.Report, 
+                    Order = 1, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-BUD-01",
+                    Description = "Taux de consommation des crédits budgétaires OPEX et CAPEX" 
+                });
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-bud-ecarts", 
+                    Title = "Analyse des écarts budgétaires", 
+                    ParentId = budget.Id, 
+                    Type = ItemType.Report, 
+                    Order = 2, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-BUD-02",
+                    Description = "Contrôle budgétaire analytique et alertes de dépassement de lignes" 
+                });
             }
         }
 
@@ -210,6 +388,7 @@ namespace PortailSocadel.Services
                 Engine = source.Engine,
                 Description = source.Description,
                 Code = source.Code,
+                SimulateError = source.SimulateError,
                 CreatedAt = source.CreatedAt,
                 UpdatedAt = source.UpdatedAt,
                 Children = new List<MenuItem>()
@@ -279,6 +458,7 @@ namespace PortailSocadel.Services
                 existing.Engine = item.Engine;
                 existing.Description = item.Description;
                 existing.Code = item.Code;
+                existing.SimulateError = item.SimulateError;
                 existing.UpdatedAt = DateTime.UtcNow;
                 return true;
             }
@@ -319,7 +499,8 @@ namespace PortailSocadel.Services
 
                 return _items
                     .Where(i => i.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                                (!string.IsNullOrEmpty(i.Description) && i.Description.Contains(query, StringComparison.OrdinalIgnoreCase)))
+                                (!string.IsNullOrEmpty(i.Description) && i.Description.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                                (!string.IsNullOrEmpty(i.Code) && i.Code.Contains(query, StringComparison.OrdinalIgnoreCase)))
                     .Select(CloneItem)
                     .ToList();
             }

@@ -20,33 +20,38 @@ namespace PortailSocadel.Pages
         public bool IsError { get; set; }
         public List<string> Breadcrumbs { get; set; } = new();
 
-        public void OnGet([FromQuery] string? report, [FromQuery] string? error)
+        public void OnGet([FromQuery] string? report)
         {
             ReportId = report;
-            IsError = !string.IsNullOrEmpty(error) && (error == "1" || error.Equals("true", StringComparison.OrdinalIgnoreCase));
 
             if (string.IsNullOrEmpty(ReportId) || ReportId.Equals("home", StringComparison.OrdinalIgnoreCase))
             {
                 IsHome = true;
                 ViewData["Title"] = "Accueil";
                 ViewData["IsHome"] = true;
-                Breadcrumbs = new List<string> { "Commercial" };
+                Breadcrumbs = new List<string> { "Portail", "Accueil" };
             }
             else
             {
                 IsHome = false;
                 CurrentReport = _navService.GetItemById(ReportId);
                 
-                // Fallback if not found directly
                 if (CurrentReport == null)
                 {
                     CurrentReport = new MenuItem
                     {
                         Id = ReportId,
-                        Title = "Rapport A",
+                        Title = "Rapport introuvable",
                         Type = ItemType.Report,
-                        Engine = ReportEngine.PowerBI
+                        Engine = ReportEngine.PowerBI,
+                        Description = "Le rapport demandé n'existe pas ou a été déplacé."
                     };
+                    IsError = true;
+                }
+                else
+                {
+                    // Point 3: Error state is triggered directly if the selected report has SimulateError enabled
+                    IsError = CurrentReport.SimulateError;
                 }
 
                 ViewData["Title"] = CurrentReport.Title;
@@ -56,7 +61,7 @@ namespace PortailSocadel.Pages
                 Breadcrumbs = _navService.GetBreadcrumbPath(ReportId);
                 if (!Breadcrumbs.Any())
                 {
-                    Breadcrumbs = new List<string> { "Commercial", "Recouvrement", CurrentReport.Title };
+                    Breadcrumbs = new List<string> { "Commercial", CurrentReport.Title };
                 }
             }
         }

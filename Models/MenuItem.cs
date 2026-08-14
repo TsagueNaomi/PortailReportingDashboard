@@ -4,7 +4,7 @@ namespace PortailSocadel.Models
     {
         Category = 1,     // Level 1: e.g. Commercial, Finance
         SubCategory = 2,  // Level 2: e.g. Recouvrement, Facturation
-        Report = 3        // Level 3: e.g. Rapport A, Rapport B
+        Report = 3        // Level 3: e.g. Taux de recouvrement, Suivi mensuel de facturation
     }
 
     public enum ReportEngine
@@ -27,6 +27,7 @@ namespace PortailSocadel.Models
         public ReportEngine Engine { get; set; } = ReportEngine.PowerBI;
         public string? Description { get; set; }
         public string? Code { get; set; }
+        public bool SimulateError { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
@@ -34,3 +35,4 @@ namespace PortailSocadel.Models
         public List<MenuItem> Children { get; set; } = new();
     }
 }
+
