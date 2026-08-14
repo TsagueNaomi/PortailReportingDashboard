@@ -1,0 +1,24 @@
+@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "Erreur de chargement";
+    ViewData["IsError"] = true;
+}
+
+<div class="error-screen-container">
+    <!-- Warning Triangle Icon -->
+    <div class="error-warning-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" stroke="currentColor">
+            <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+        </svg>
+    </div>
+
+    <!-- Error Messages -->
+    <h2 class="error-main-title">Impossible de charger le rapport.</h2>
+    <p class="error-sub-title">Veuillez réessayer.</p>
+
+    <!-- Green Action Button -->
+    <a href="/?report=rep-rec-a" class="btn-retry-action">
+        Réessayer
+    </a>
+</div>

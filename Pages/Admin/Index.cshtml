@@ -1,0 +1,390 @@
+@page
+@model PortailSocadel.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Administration des Menus et Rapports";
+    ViewData["IsAdmin"] = true;
+}
+
+<div class="admin-view-container">
+    <!-- Header Strip -->
+    <div class="admin-header-strip">
+        <div class="admin-title-area">
+            <h2>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                </svg>
+                Administration de l'Arborescence & Rapports
+            </h2>
+            <p>Gérez les menus de niveau 1 (Catégories), niveau 2 (Sous-menus) et niveau 3 (Rapports décisionnels).</p>
+        </div>
+        <div class="admin-top-actions">
+            <button type="button" class="btn-admin-primary" onclick="openAdminModal('modalAddItem')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                <span>Nouveau Rapport / Menu</span>
+            </button>
+            <form method="post" asp-page-handler="Reset" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir réinitialiser l\'arborescence aux valeurs par défaut de SOCADEL ?');">
+                <button type="submit" class="btn-admin-secondary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                    </svg>
+                    <span>Réinitialiser par défaut</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Alert Banners -->
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div style="margin: 12px 20px 0 20px; padding: 10px 16px; background-color: #E8F5E9; border-left: 4px solid var(--socadel-green); border-radius: 4px; color: #2E7D32; font-size: 13px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <strong>Succès :</strong> @Model.SuccessMessage
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#2E7D32; cursor:pointer; font-size:16px;">&times;</button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div style="margin: 12px 20px 0 20px; padding: 10px 16px; background-color: #FFEBEE; border-left: 4px solid #D32F2F; border-radius: 4px; color: #C62828; font-size: 13px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <strong>Erreur :</strong> @Model.ErrorMessage
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#C62828; cursor:pointer; font-size:16px;">&times;</button>
+        </div>
+    }
+
+    <!-- Stat Cards Grid -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <span class="admin-stat-label">Catégories (Niveau 1)</span>
+            <span class="admin-stat-val">@Model.TotalCategories</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="admin-stat-label">Sous-menus (Niveau 2)</span>
+            <span class="admin-stat-val">@Model.TotalSubCategories</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="admin-stat-label">Rapports actifs (Niveau 3)</span>
+            <span class="admin-stat-val" style="color: var(--socadel-green);">@Model.TotalReports</span>
+        </div>
+        <div class="admin-stat-card">
+            <span class="admin-stat-label">Total des éléments</span>
+            <span class="admin-stat-val" style="color: var(--socadel-text-main);">@Model.FlatItems.Count</span>
+        </div>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="admin-filter-bar">
+        <input type="text" id="adminTableSearch" class="admin-filter-input" placeholder="Filtrer par titre ou description..." />
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: var(--socadel-text-sub);">Niveau :</label>
+            <select id="adminTypeFilter" class="admin-filter-select">
+                <option value="">Tous les niveaux</option>
+                <option value="1">Niveau 1 (Catégorie)</option>
+                <option value="2">Niveau 2 (Sous-menu)</option>
+                <option value="3">Niveau 3 (Rapport)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Table of Hierarchical Tree Items -->
+    <div class="admin-table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th style="width: 32%;">Titre de l'élément</th>
+                    <th style="width: 14%;">Type / Niveau</th>
+                    <th style="width: 16%;">Parent</th>
+                    <th style="width: 12%;">Moteur / Format</th>
+                    <th style="width: 8%; text-align: center;">Ordre</th>
+                    <th style="width: 8%; text-align: center;">Statut</th>
+                    <th style="width: 10%; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cat in Model.TreeItems)
+                {
+                    <tr data-title="@cat.Title @cat.Description" data-level="1">
+                        <td>
+                            <div class="tree-node-cell level-indent-0">
+                                <span style="color: var(--socadel-blue); font-size: 14px;">📁</span>
+                                <strong>@cat.Title</strong>
+                            </div>
+                        </td>
+                        <td><span class="badge badge-level-1">1 - Catégorie</span></td>
+                        <td style="color: #888;">— (Racine)</td>
+                        <td style="color: #888;">—</td>
+                        <td style="text-align: center;">@cat.Order</td>
+                        <td style="text-align: center;">
+                            <span class="badge @(cat.IsActive ? "badge-active" : "badge-inactive")">
+                                @(cat.IsActive ? "Actif" : "Inactif")
+                            </span>
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <button type="button" class="btn-table-action btn-table-add" onclick="openAddChildModal('@cat.Id', '1')" title="Ajouter un sous-menu">+ Sous-menu</button>
+                            <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@cat.Id', '@cat.Title', '', '1', '@cat.Order', 'PowerBI', '@cat.Description')" title="Modifier">✏️</button>
+                            <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de la catégorie « @cat.Title » et de tous ses sous-éléments ?');">
+                                <input type="hidden" name="id" value="@cat.Id" />
+                                <button type="submit" class="btn-table-action btn-table-delete" title="Supprimer">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    @foreach (var sub in cat.Children)
+                    {
+                        <tr data-title="@sub.Title @sub.Description" data-level="2">
+                            <td>
+                                <div class="tree-node-cell level-indent-1">
+                                    <span style="color: var(--socadel-green); font-size: 14px;">📂</span>
+                                    <span>@sub.Title</span>
+                                </div>
+                            </td>
+                            <td><span class="badge badge-level-2">2 - Sous-menu</span></td>
+                            <td><strong style="color: var(--socadel-blue);">@cat.Title</strong></td>
+                            <td style="color: #888;">—</td>
+                            <td style="text-align: center;">@sub.Order</td>
+                            <td style="text-align: center;">
+                                <span class="badge @(sub.IsActive ? "badge-active" : "badge-inactive")">
+                                    @(sub.IsActive ? "Actif" : "Inactif")
+                                </span>
+                            </td>
+                            <td style="text-align: right; white-space: nowrap;">
+                                <button type="button" class="btn-table-action btn-table-add" onclick="openAddChildModal('@sub.Id', '2')" title="Ajouter un rapport">+ Rapport</button>
+                                <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@sub.Id', '@sub.Title', '@cat.Id', '2', '@sub.Order', 'PowerBI', '@sub.Description')" title="Modifier">✏️</button>
+                                <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Confirmer la suppression du sous-menu « @sub.Title » et de ses rapports ?');">
+                                    <input type="hidden" name="id" value="@sub.Id" />
+                                    <button type="submit" class="btn-table-action btn-table-delete" title="Supprimer">🗑️</button>
+                                </form>
+                            </td>
+                        </tr>
+
+                        @foreach (var report in sub.Children)
+                        {
+                            <tr data-title="@report.Title @report.Description @sub.Title @cat.Title" data-level="3">
+                                <td>
+                                    <div class="tree-node-cell level-indent-2">
+                                        <span style="color: #4A5568; font-size: 14px;">📊</span>
+                                        <a href="/?report=@report.Id" style="color: var(--socadel-text-main); font-weight: 500; text-decoration: none;" title="Ouvrir le rapport">
+                                            @report.Title
+                                        </a>
+                                    </div>
+                                </td>
+                                <td><span class="badge badge-level-3">3 - Rapport</span></td>
+                                <td><span style="color: #4A5568;">@sub.Title</span></td>
+                                <td><span class="badge badge-engine">@report.Engine</span></td>
+                                <td style="text-align: center;">@report.Order</td>
+                                <td style="text-align: center;">
+                                    <span class="badge @(report.IsActive ? "badge-active" : "badge-inactive")">
+                                        @(report.IsActive ? "Actif" : "Inactif")
+                                    </span>
+                                </td>
+                                <td style="text-align: right; white-space: nowrap;">
+                                    <a href="/?report=@report.Id" class="btn-table-action" style="color: var(--socadel-blue);" title="Tester l'affichage">👁️</a>
+                                    <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@report.Id', '@report.Title', '@sub.Id', '3', '@report.Order', '@report.Engine', '@report.Description')" title="Modifier">✏️</button>
+                                    <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Confirmer la suppression du rapport « @report.Title » ?');">
+                                        <input type="hidden" name="id" value="@report.Id" />
+                                        <button type="submit" class="btn-table-action btn-table-delete" title="Supprimer">🗑️</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- =========================================================================
+     MODAL: AJOUTER UN NOUVEL ÉLÉMENT
+     ========================================================================= -->
+<div class="modal-overlay" id="modalAddItem">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3>Ajouter un élément à l'arborescence</h3>
+            <button type="button" class="modal-close-btn" onclick="closeAdminModal('modalAddItem')">&times;</button>
+        </div>
+        <form method="post" asp-page-handler="Add">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="addItemType">Type d'élément</label>
+                    <select id="addItemType" name="ItemInput.Type" class="form-control" onchange="toggleAddParentSelector()">
+                        <option value="1">Niveau 1 - Catégorie (Ex: Commercial, Finance)</option>
+                        <option value="2">Niveau 2 - Sous-menu (Ex: Recouvrement, Facturation)</option>
+                        <option value="3" selected>Niveau 3 - Rapport décisionnel (Ex: Rapport A)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="addGroupParent">
+                    <label class="form-label" for="addItemParentId">Élément parent</label>
+                    <select id="addItemParentId" name="ItemInput.ParentId" class="form-control">
+                        <optgroup label="-- Sous-menus (pour les Rapports) --" id="optgroupSubCategories">
+                            @foreach (var sub in Model.SubCategoryOptions)
+                            {
+                                var parentCat = Model.CategoryOptions.FirstOrDefault(c => c.Id == sub.ParentId);
+                                var label = parentCat != null ? $"{parentCat.Title} > {sub.Title}" : sub.Title;
+                                <option value="@sub.Id">@label</option>
+                            }
+                        </optgroup>
+                        <optgroup label="-- Catégories (pour les Sous-menus) --" id="optgroupCategories">
+                            @foreach (var cat in Model.CategoryOptions)
+                            {
+                                <option value="@cat.Id">@cat.Title</option>
+                            }
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="addItemTitle">Titre de l'élément *</label>
+                    <input type="text" id="addItemTitle" name="ItemInput.Title" class="form-control" placeholder="Ex: Rapport A, Recouvrement, Trésorerie..." required />
+                </div>
+
+                <div class="form-group" id="addGroupEngine">
+                    <label class="form-label" for="addItemEngine">Moteur de reporting</label>
+                    <select id="addItemEngine" name="ItemInput.Engine" class="form-control">
+                        <option value="PowerBI">Power BI</option>
+                        <option value="SSRS">SQL Server Reporting Services (SSRS)</option>
+                        <option value="Excel">Tableau de bord Excel</option>
+                        <option value="Custom">Graphique personnalisé</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label" for="addItemOrder">Ordre d'affichage</label>
+                        <input type="number" id="addItemOrder" name="ItemInput.Order" class="form-control" value="1" min="1" max="99" />
+                    </div>
+                    <div class="form-group" style="flex: 1; display: flex; align-items: flex-end; padding-bottom: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                            <input type="checkbox" name="ItemInput.IsActive" value="true" checked />
+                            <span>Élément actif</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="addItemDescription">Description / Note</label>
+                    <textarea id="addItemDescription" name="ItemInput.Description" class="form-control form-control-textarea" placeholder="Description de l'élément ou du rapport..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-admin-secondary" onclick="closeAdminModal('modalAddItem')">Annuler</button>
+                <button type="submit" class="btn-admin-primary">Enregistrer l'élément</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- =========================================================================
+     MODAL: MODIFIER UN ÉLÉMENT
+     ========================================================================= -->
+<div class="modal-overlay" id="modalEditItem">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3>Modifier l'élément</h3>
+            <button type="button" class="modal-close-btn" onclick="closeAdminModal('modalEditItem')">&times;</button>
+        </div>
+        <form method="post" asp-page-handler="Edit">
+            <input type="hidden" id="editItemId" name="ItemInput.Id" />
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="editItemType">Type d'élément</label>
+                    <select id="editItemType" name="ItemInput.Type" class="form-control">
+                        <option value="1">Niveau 1 - Catégorie</option>
+                        <option value="2">Niveau 2 - Sous-menu</option>
+                        <option value="3">Niveau 3 - Rapport décisionnel</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="editGroupParent">
+                    <label class="form-label" for="editItemParentId">Élément parent</label>
+                    <select id="editItemParentId" name="ItemInput.ParentId" class="form-control">
+                        <option value="">-- Aucun parent (Racine) --</option>
+                        <optgroup label="Catégories (Niveau 1)">
+                            @foreach (var cat in Model.CategoryOptions)
+                            {
+                                <option value="@cat.Id">@cat.Title</option>
+                            }
+                        </optgroup>
+                        <optgroup label="Sous-menus (Niveau 2)">
+                            @foreach (var sub in Model.SubCategoryOptions)
+                            {
+                                var parentCat = Model.CategoryOptions.FirstOrDefault(c => c.Id == sub.ParentId);
+                                var label = parentCat != null ? $"{parentCat.Title} > {sub.Title}" : sub.Title;
+                                <option value="@sub.Id">@label</option>
+                            }
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="editItemTitle">Titre de l'élément *</label>
+                    <input type="text" id="editItemTitle" name="ItemInput.Title" class="form-control" required />
+                </div>
+
+                <div class="form-group" id="editGroupEngine">
+                    <label class="form-label" for="editItemEngine">Moteur de reporting</label>
+                    <select id="editItemEngine" name="ItemInput.Engine" class="form-control">
+                        <option value="PowerBI">Power BI</option>
+                        <option value="SSRS">SQL Server Reporting Services (SSRS)</option>
+                        <option value="Excel">Tableau de bord Excel</option>
+                        <option value="Custom">Graphique personnalisé</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label" for="editItemOrder">Ordre d'affichage</label>
+                        <input type="number" id="editItemOrder" name="ItemInput.Order" class="form-control" min="1" max="99" />
+                    </div>
+                    <div class="form-group" style="flex: 1; display: flex; align-items: flex-end; padding-bottom: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                            <input type="checkbox" id="editItemIsActive" name="ItemInput.IsActive" value="true" checked />
+                            <span>Élément actif</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="editItemDescription">Description / Note</label>
+                    <textarea id="editItemDescription" name="ItemInput.Description" class="form-control form-control-textarea"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-admin-secondary" onclick="closeAdminModal('modalEditItem')">Annuler</button>
+                <button type="submit" class="btn-admin-primary">Enregistrer les modifications</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleAddParentSelector() {
+            const typeSelect = document.getElementById('addItemType');
+            const parentGroup = document.getElementById('addGroupParent');
+            const engineGroup = document.getElementById('addGroupEngine');
+            const optSub = document.getElementById('optgroupSubCategories');
+            const optCat = document.getElementById('optgroupCategories');
+
+            if (typeSelect.value === '1') {
+                parentGroup.style.display = 'none';
+                engineGroup.style.display = 'none';
+            } else if (typeSelect.value === '2') {
+                parentGroup.style.display = 'block';
+                optCat.style.display = '';
+                optSub.style.display = 'none';
+                engineGroup.style.display = 'none';
+            } else {
+                parentGroup.style.display = 'block';
+                optCat.style.display = 'none';
+                optSub.style.display = '';
+                engineGroup.style.display = 'block';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', toggleAddParentSelector);
+    </script>
+}

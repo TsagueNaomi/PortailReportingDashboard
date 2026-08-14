@@ -1,0 +1,243 @@
+@inject INavigationService NavService
+@{
+    var tree = NavService.GetMenuTree();
+    var activeReportId = ViewData["ActiveReportId"]?.ToString() ?? Context.Request.Query["report"].ToString();
+    if (string.IsNullOrEmpty(activeReportId) && ViewData["IsActiveReportDemo"] as bool? == true)
+    {
+        activeReportId = "rep-rec-a"; // Default selected report matching Screenshot 1 (Recouvrement > Rapport A)
+    }
+
+    var isHome = string.IsNullOrEmpty(activeReportId) && (ViewData["IsHome"] as bool? == true || Context.Request.Path == "/" && !Context.Request.Query.ContainsKey("report"));
+    var isError = Context.Request.Query.ContainsKey("error") || ViewData["IsError"] as bool? == true;
+    var isAdmin = Context.Request.Path.StartsWithSegments("/Admin") || ViewData["IsAdmin"] as bool? == true;
+
+    // Determine current breadcrumbs
+    List<string> breadcrumbs = new();
+    if (isAdmin)
+    {
+        breadcrumbs = new List<string> { "Administration", "Gestion des menus et rapports" };
+    }
+    else if (isHome)
+    {
+        breadcrumbs.Add("Commercial");
+    }
+    else if (!string.IsNullOrEmpty(activeReportId))
+    {
+        breadcrumbs = NavService.GetBreadcrumbPath(activeReportId);
+        if (!breadcrumbs.Any())
+        {
+            breadcrumbs = new List<string> { "Commercial", "Recouvrement", "Rapport A" };
+        }
+    }
+    else
+    {
+        breadcrumbs.Add("Commercial");
+    }
+}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "Portail Décisionnel") - SOCADEL</title>
+    
+    <!-- Pure Vanilla CSS Stylesheet -->
+    <link rel="stylesheet" href="~/css/portal.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app-container">
+        <!-- =================================================================
+             1. LEFT SIDEBAR NAVIGATION (~22% width, exact SOCADEL structure)
+             ================================================================= -->
+        <aside class="app-sidebar">
+            <!-- 1.1 SOCADEL Official Logo -->
+            <div class="sidebar-header">
+                <a href="/" class="sidebar-logo-link" title="Accueil Portail SOCADEL">
+                    <img src="~/images/logo-socadel.jpg" alt="SOCADEL - Société Camerounaise d'Electricité" class="sidebar-logo-img" />
+                </a>
+            </div>
+
+            <!-- 1.2 Sidebar Search Input + Green Button -->
+            <div class="sidebar-search-box">
+                <input type="text" id="sidebarSearchInput" class="sidebar-search-input" placeholder="Rechercher" autocomplete="off" />
+                <button type="button" class="sidebar-search-btn" title="Rechercher" aria-label="Rechercher">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 1.3 Collapsible / Expandable Tree Menu (3 Levels) -->
+            <nav class="sidebar-nav-container" aria-label="Menu principal">
+                <ul class="tree-root">
+                    @foreach (var cat in tree)
+                    {
+                        var isCommercial = cat.Title.Equals("Commercial", StringComparison.OrdinalIgnoreCase);
+                        var isCatCollapsed = !isCommercial; // Commercial is open by default as in mockups
+
+                        <li class="tree-level-1-item @(isCatCollapsed ? "collapsed" : "")" data-id="@cat.Id">
+                            <div class="tree-cat-header" title="@cat.Description">
+                                <span class="tree-caret">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M7 10l5 5 5-5z"/>
+                                    </svg>
+                                </span>
+                                <span class="tree-title">@cat.Title</span>
+                            </div>
+
+                            @if (cat.Children.Any())
+                            {
+                                <ul class="tree-level-2-list">
+                                    @foreach (var sub in cat.Children)
+                                    {
+                                        var isSubCollapsed = string.IsNullOrEmpty(activeReportId) || !sub.Children.Any(r => r.Id == activeReportId);
+
+                                        <li class="tree-level-2-item @(isSubCollapsed ? "collapsed" : "")" data-id="@sub.Id">
+                                            <div class="tree-sub-header" title="@sub.Description">
+                                                <span class="tree-caret">
+                                                    <svg viewBox="0 0 24 24">
+                                                        <path d="M7 10l5 5 5-5z"/>
+                                                    </svg>
+                                                </span>
+                                                <span class="tree-title">@sub.Title</span>
+                                            </div>
+
+                                            @if (sub.Children.Any())
+                                            {
+                                                <ul class="tree-level-3-list">
+                                                    @foreach (var report in sub.Children)
+                                                    {
+                                                        var isActive = report.Id == activeReportId;
+                                                        <li class="tree-level-3-item">
+                                                            <a href="/?report=@report.Id" 
+                                                               class="tree-report-link @(isActive ? "active" : "")" 
+                                                               data-id="@report.Id"
+                                                               data-title="@report.Title - @sub.Title"
+                                                               title="@report.Description">
+                                                                @report.Title
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </li>
+                    }
+                </ul>
+            </nav>
+
+            <!-- 1.4 Sidebar Footer with Admin Shortcut -->
+            <div class="sidebar-footer">
+                <a href="/Admin" class="sidebar-admin-link" title="Administration des menus et rapports">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                    <span>Administration</span>
+                </a>
+                <span style="color: #A0AEC0; font-size: 11px;">v2.4</span>
+            </div>
+        </aside>
+
+        <!-- =================================================================
+             2. MAIN CONTENT AREA (Right Side)
+             ================================================================= -->
+        <main class="app-main">
+            <!-- 2.1 Top Blue Header (Exact match to Mockups) -->
+            <header class="main-header">
+                <!-- Spacer or Brand for mobile/responsive -->
+                <div></div>
+
+                <!-- Centered Search Bar in Blue Header -->
+                <div class="header-search-container">
+                    <input type="text" id="headerSearchInput" class="header-search-input" placeholder="Rechercher" autocomplete="off" />
+                    <div class="header-search-divider"></div>
+                    <button type="button" class="header-search-icon-btn" title="Lancer la recherche" aria-label="Rechercher">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Right User Section (Naomi Tsague / NT) -->
+                <div class="header-user-section" id="headerUserSection" title="Compte connecté : Naomi Tsague">
+                    <div class="user-text-details">
+                        <div class="user-name-title">Naomi Tsague</div>
+                        <div class="user-role-subtitle">Naomi Tsague</div>
+                    </div>
+                    <div class="user-avatar-circle">
+                        <span>NT</span>
+                    </div>
+
+                    <!-- User Dropdown Menu -->
+                    <div class="user-dropdown-menu" id="userDropdownMenu">
+                        <a href="/" class="user-dropdown-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                            <span>Accueil Portail</span>
+                        </a>
+                        <a href="/?report=rep-rec-a" class="user-dropdown-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                            <span>Vue Rapport Actif</span>
+                        </a>
+                        <a href="/?report=rep-rec-a&error=1" class="user-dropdown-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                            <span>Vue État d'Erreur</span>
+                        </a>
+                        <div class="user-dropdown-divider"></div>
+                        <a href="/Admin" class="user-dropdown-item" style="color: var(--socadel-blue); font-weight: 600;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                            <span>Espace Administration</span>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 2.2 Sub-Header (Breadcrumbs on Left, Green Action Buttons on Right) -->
+            <div class="page-subheader">
+                <nav class="breadcrumb-nav" aria-label="Fil d'Ariane">
+                    @for (int i = 0; i < breadcrumbs.Count; i++)
+                    {
+                        var isLast = i == breadcrumbs.Count - 1;
+                        if (isLast)
+                        {
+                            <span class="breadcrumb-active">@breadcrumbs[i]</span>
+                        }
+                        else
+                        {
+                            <span class="breadcrumb-item">@breadcrumbs[i]</span>
+                            <span class="breadcrumb-separator">›</span>
+                        }
+                    }
+                </nav>
+
+                <div class="subheader-actions">
+                    <!-- Plein écran / Ouvrir button (Green square) -->
+                    <button type="button" class="action-btn-green" id="btnFullscreen" title="Plein écran" aria-label="Plein écran">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                            <polyline points="7 7 17 7 17 17"></polyline>
+                        </svg>
+                    </button>
+                    <!-- Actualiser button (Green square) -->
+                    <button type="button" class="action-btn-green" id="btnRefresh" title="Actualiser le rapport" aria-label="Actualiser">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2.3 Main Report Workspace Card (Houses View 1, 2, 3, or Admin) -->
+            <section class="report-workspace" id="mainReportWorkspace">
+                @RenderBody()
+            </section>
+        </main>
+    </div>
+
+    <!-- Master Scripts -->
+    <script src="~/js/portal.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

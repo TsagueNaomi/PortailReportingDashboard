@@ -1,0 +1,1296 @@
+/* ==========================================================================
+   SOCADEL Reporting Portal - Master CSS
+   Pixel-perfect design system based on SOCADEL official reference mockups
+   ========================================================================== */
+
+:root {
+  /* Primary Brand Colors */
+  --socadel-blue: #1D70B8;
+  --socadel-blue-alt: #1D70B8;
+  --socadel-blue-dark: #155B96;
+  --socadel-blue-light: #EBF3FA;
+  
+  /* Green Accent & Action Colors */
+  --socadel-green: #7CB342;
+  --socadel-green-hover: #689F38;
+  --socadel-green-light: #EBF5E9;
+  --socadel-green-border: #7CB342;
+  --socadel-green-chart: #8ABB56;
+  --socadel-blue-chart: #2F76B1;
+
+  /* Surfaces & Backgrounds */
+  --socadel-sidebar-bg: #FFFFFF;
+  --socadel-sidebar-border: #E1E6EA;
+  --socadel-body-bg: #F4F6F8;
+  --socadel-card-bg: #FFFFFF;
+  --socadel-card-border: #E1E6EA;
+  --socadel-powerbi-bar: #2C2C2E;
+  --socadel-tile-border: #E5E9EC;
+
+  /* Typography Colors */
+  --socadel-text-main: #1A1A1A;
+  --socadel-text-sub: #5A6A85;
+  --socadel-text-muted: #6C757D;
+  --socadel-text-dark: #2C3E50;
+  
+  /* Warning & Status */
+  --socadel-warning: #BB774F;
+  --socadel-warning-bg: #FFF8F0;
+  --socadel-danger: #D32F2F;
+  --socadel-success: #388E3C;
+
+  /* Sizing & Radius */
+  --sidebar-width: 300px;
+  --header-height: 64px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Reset & Base Rules */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--socadel-text-main);
+  background-color: var(--socadel-body-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Application Layout (Sidebar + Main Area)
+   ========================================================================== */
+.app-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Left Sidebar Navigation (~22% width, exact 300px)
+   ========================================================================== */
+.app-sidebar {
+  width: var(--sidebar-width);
+  min-width: 270px;
+  max-width: 340px;
+  height: 100vh;
+  background-color: var(--socadel-sidebar-bg);
+  border-right: 1px solid var(--socadel-sidebar-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+/* 1. Sidebar Header (SOCADEL Logo) */
+.sidebar-header {
+  padding: 16px 20px 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 70px;
+}
+
+.sidebar-logo-link {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.sidebar-logo-img {
+  max-width: 160px;
+  height: auto;
+  max-height: 52px;
+  object-fit: contain;
+  display: block;
+}
+
+/* 2. Sidebar Search Bar */
+.sidebar-search-box {
+  padding: 8px 16px 16px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sidebar-search-input {
+  flex: 1;
+  height: 34px;
+  padding: 6px 10px;
+  border: 1px solid #D5DCE2;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--socadel-text-main);
+  background-color: #FFFFFF;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sidebar-search-input:focus {
+  border-color: var(--socadel-blue);
+  box-shadow: 0 0 0 2px rgba(21, 101, 168, 0.15);
+}
+
+.sidebar-search-input::placeholder {
+  color: #9AA5B1;
+}
+
+.sidebar-search-btn {
+  width: 34px;
+  height: 34px;
+  background-color: var(--socadel-green);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.sidebar-search-btn:hover {
+  background-color: var(--socadel-green-hover);
+}
+
+.sidebar-search-btn svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+/* 3. Sidebar Tree Navigation (3 Levels) */
+.sidebar-nav-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 10px 20px 10px;
+}
+
+/* Custom Scrollbar for sidebar */
+.sidebar-nav-container::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar-nav-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-nav-container::-webkit-scrollbar-thumb {
+  background: #D5DCE2;
+  border-radius: 4px;
+}
+
+.tree-root {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Level 1: Category (Commercial, Finance) */
+.tree-level-1-item {
+  margin-bottom: 6px;
+}
+
+.tree-cat-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1A1A1A;
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s;
+}
+
+.tree-cat-header:hover {
+  background-color: #F4F6F8;
+}
+
+.tree-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-size: 9px;
+  color: #333333;
+  transition: transform 0.2s ease;
+  user-select: none;
+}
+
+.tree-caret svg {
+  width: 8px;
+  height: 8px;
+  fill: #333333;
+  transition: transform 0.2s ease;
+}
+
+.tree-level-1-item.collapsed > .tree-cat-header .tree-caret svg,
+.tree-level-2-item.collapsed > .tree-sub-header .tree-caret svg {
+  transform: rotate(-90deg);
+}
+
+.tree-level-1-item.collapsed > .tree-level-2-list,
+.tree-level-2-item.collapsed > .tree-level-3-list {
+  display: none;
+}
+
+/* Level 2: Subcategories (Encaissement, Facturation, Recouvrement, etc.) */
+.tree-level-2-list {
+  list-style: none;
+  padding-left: 14px;
+  margin: 2px 0 6px 0;
+}
+
+.tree-level-2-item {
+  margin-bottom: 2px;
+}
+
+.tree-sub-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2C3E50;
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s;
+}
+
+.tree-sub-header:hover {
+  background-color: #F4F6F8;
+}
+
+/* Level 3: Reports (Rapport A, Rapport B) */
+.tree-level-3-list {
+  list-style: none;
+  padding-left: 20px;
+  margin: 2px 0 4px 0;
+}
+
+.tree-level-3-item {
+  margin: 1px 0;
+}
+
+.tree-report-link {
+  display: block;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #4A5568;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.tree-report-link:hover {
+  background-color: #F0F4F8;
+  color: #1A1A1A;
+}
+
+/* EXACT MATCH to Screenshot 1: Active Report Highlight */
+.tree-report-link.active {
+  background-color: var(--socadel-green);
+  color: #FFFFFF !important;
+  font-weight: 600;
+}
+
+.tree-report-link.active:hover {
+  background-color: var(--socadel-green-hover);
+}
+
+/* Sidebar Footer (Admin Shortcut & Quick Info) */
+.sidebar-footer {
+  padding: 10px 14px;
+  border-top: 1px solid var(--socadel-sidebar-border);
+  background-color: #FAFBFC;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.sidebar-admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--socadel-blue);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background-color: rgba(21, 101, 168, 0.08);
+  transition: all 0.2s;
+}
+
+.sidebar-admin-link:hover {
+  background-color: rgba(21, 101, 168, 0.15);
+  color: var(--socadel-blue-dark);
+}
+
+/* ==========================================================================
+   Main Content Area (Right Side)
+   ========================================================================== */
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--socadel-body-bg);
+}
+
+/* 1. Top Blue Header */
+.main-header {
+  height: var(--header-height);
+  background-color: var(--socadel-blue);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  z-index: 5;
+}
+
+/* Centered Header Search */
+.header-search-container {
+  display: flex;
+  align-items: center;
+  background-color: #FFFFFF;
+  border-radius: var(--radius-sm);
+  width: 380px;
+  max-width: 42vw;
+  height: 36px;
+  padding: 0 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.header-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 13.5px;
+  color: #1A1A1A;
+  background: transparent;
+  padding-right: 6px;
+}
+
+.header-search-input::placeholder {
+  color: #9E9E9E;
+}
+
+.header-search-divider {
+  width: 1px;
+  height: 18px;
+  background-color: #D1D5DB;
+  margin: 0 6px;
+}
+
+.header-search-icon-btn {
+  background: none;
+  border: none;
+  color: #757575;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.header-search-icon-btn:hover {
+  color: var(--socadel-blue);
+}
+
+.header-search-icon-btn svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+/* User Profile (Naomi Tsague) */
+.header-user-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.user-text-details {
+  text-align: right;
+  line-height: 1.25;
+}
+
+.user-name-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.1px;
+}
+
+.user-role-subtitle {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.user-avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  color: var(--socadel-blue);
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+/* User Dropdown Menu */
+.user-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--socadel-sidebar-border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 50;
+  padding: 6px 0;
+}
+
+.user-dropdown-menu.show {
+  display: block;
+}
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--socadel-text-main);
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.user-dropdown-item:hover {
+  background-color: #F4F6F8;
+  color: var(--socadel-blue);
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background-color: var(--socadel-sidebar-border);
+  margin: 4px 0;
+}
+
+/* 2. Subheader (Breadcrumb & Action Buttons) */
+.page-subheader {
+  padding: 14px 24px 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--socadel-text-muted);
+}
+
+.breadcrumb-item {
+  color: #4A5568;
+}
+
+.breadcrumb-separator {
+  color: #A0AEC0;
+  font-size: 12px;
+}
+
+.breadcrumb-active {
+  font-weight: 700;
+  color: #1A1A1A;
+}
+
+/* Action Buttons (Fullscreen & Refresh) */
+.subheader-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn-green {
+  width: 34px;
+  height: 34px;
+  background-color: var(--socadel-green);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.action-btn-green:hover {
+  background-color: var(--socadel-green-hover);
+}
+
+.action-btn-green:active {
+  transform: scale(0.96);
+}
+
+.action-btn-green svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* 3. Main Reporting Card Container */
+.report-workspace {
+  flex: 1;
+  margin: 0 24px 24px 24px;
+  background-color: var(--socadel-card-bg);
+  border: 1px solid var(--socadel-card-border);
+  border-radius: var(--radius-md);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-subtle);
+  position: relative;
+}
+
+/* ==========================================================================
+   VIEW 1: ACTIVE REPORT (Power BI Container & Visuals)
+   ========================================================================== */
+.pbi-report-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.pbi-top-bar {
+  background-color: var(--socadel-powerbi-bar);
+  color: #FFFFFF;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  font-weight: 500;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.pbi-dashboard-body {
+  flex: 1;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 14px;
+  background-color: #FFFFFF;
+}
+
+/* Dashboard Tiles */
+.pbi-tile {
+  background-color: #FFFFFF;
+  border: 1px solid var(--socadel-tile-border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.pbi-tile:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Tile 1: Line Chart Visual */
+.line-chart-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.line-chart-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 180px;
+  overflow: visible;
+}
+
+/* Tile 2 & 4: Vertical Bar Charts */
+.v-bar-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 10px 4px 4px 4px;
+  gap: 6px;
+}
+
+.v-bar {
+  flex: 1;
+  max-width: 28px;
+  border-radius: 1px;
+  transition: height 0.3s ease, opacity 0.2s;
+  cursor: pointer;
+  position: relative;
+}
+
+.v-bar:hover {
+  opacity: 0.85;
+}
+
+.v-bar.blue {
+  background-color: var(--socadel-blue-chart);
+}
+
+.v-bar.green {
+  background-color: var(--socadel-green-chart);
+}
+
+/* Tile 3: Horizontal Bar Chart */
+.h-bar-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 10px 14px;
+  gap: 12px;
+}
+
+.h-bar-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.h-bar {
+  height: 18px;
+  border-radius: 1px;
+  transition: width 0.3s ease, opacity 0.2s;
+  cursor: pointer;
+}
+
+.h-bar:hover {
+  opacity: 0.85;
+}
+
+.h-bar.blue {
+  background-color: var(--socadel-blue-chart);
+}
+
+.h-bar.green {
+  background-color: var(--socadel-green-chart);
+}
+
+/* Tile 5 & 6: KPI Cards */
+.kpi-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.kpi-main-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--socadel-text-main);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.kpi-main-number.green-accent {
+  color: var(--socadel-green);
+}
+
+.kpi-caption {
+  font-size: 13px;
+  color: var(--socadel-text-muted);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   VIEW 2: HOME DEFAULT SCREEN (Welcome & Shortcuts)
+   ========================================================================== */
+.welcome-screen-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 480px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.welcome-icon-badge {
+  width: 60px;
+  height: 60px;
+  background-color: var(--socadel-green-light);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.welcome-icon-badge svg {
+  width: 32px;
+  height: 32px;
+}
+
+.welcome-heading {
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--socadel-text-main);
+  margin-bottom: 8px;
+}
+
+.welcome-subtext {
+  font-size: 13.5px;
+  color: var(--socadel-text-sub);
+  max-width: 580px;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.welcome-shortcuts-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.shortcut-box {
+  width: 175px;
+  background-color: #FFFFFF;
+  border: 1.5px solid var(--socadel-green-border);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
+  display: block;
+}
+
+.shortcut-box:hover {
+  background-color: #FBFDFB;
+  box-shadow: 0 3px 10px rgba(124, 179, 66, 0.18);
+  transform: translateY(-2px);
+}
+
+.shortcut-box-category {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--socadel-text-main);
+  display: block;
+}
+
+.shortcut-box-report {
+  font-size: 12.5px;
+  color: #4A5568;
+  margin-top: 4px;
+  display: block;
+}
+
+/* ==========================================================================
+   VIEW 3: ERROR STATE SCREEN
+   ========================================================================== */
+.error-screen-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 480px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.error-warning-icon {
+  width: 56px;
+  height: 56px;
+  color: var(--socadel-warning);
+  margin-bottom: 22px;
+}
+
+.error-warning-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--socadel-warning);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.error-main-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--socadel-text-main);
+  margin-bottom: 4px;
+}
+
+.error-sub-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--socadel-text-main);
+  margin-bottom: 24px;
+}
+
+.btn-retry-action {
+  background-color: var(--socadel-green);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 36px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-retry-action:hover {
+  background-color: var(--socadel-green-hover);
+}
+
+.btn-retry-action:active {
+  transform: scale(0.97);
+}
+
+/* ==========================================================================
+   ADMINISTRATION SECTION (/Admin)
+   Clean back-office style matching the Blue / Green corporate identity
+   ========================================================================== */
+.admin-view-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #FFFFFF;
+}
+
+.admin-header-strip {
+  padding: 14px 20px;
+  background-color: #F8FAFC;
+  border-bottom: 1px solid var(--socadel-sidebar-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-title-area h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--socadel-blue);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-title-area p {
+  font-size: 12.5px;
+  color: var(--socadel-text-muted);
+  margin-top: 2px;
+}
+
+.admin-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-admin-primary {
+  background-color: var(--socadel-green);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.btn-admin-primary:hover {
+  background-color: var(--socadel-green-hover);
+}
+
+.btn-admin-secondary {
+  background-color: #FFFFFF;
+  color: var(--socadel-blue);
+  border: 1px solid var(--socadel-blue);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.btn-admin-secondary:hover {
+  background-color: var(--socadel-blue-light);
+}
+
+/* Stats Row */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  padding: 16px 20px 8px 20px;
+}
+
+.admin-stat-card {
+  background-color: #FAFBFC;
+  border: 1px solid var(--socadel-sidebar-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-stat-label {
+  font-size: 12px;
+  color: var(--socadel-text-muted);
+  font-weight: 500;
+}
+
+.admin-stat-val {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--socadel-blue);
+  margin-top: 4px;
+}
+
+/* Filter bar in Admin */
+.admin-filter-bar {
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-filter-input {
+  width: 260px;
+  height: 32px;
+  padding: 4px 10px;
+  border: 1px solid #D5DCE2;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.admin-filter-select {
+  height: 32px;
+  padding: 4px 10px;
+  border: 1px solid #D5DCE2;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  background-color: #FFFFFF;
+}
+
+/* Admin Table */
+.admin-table-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 20px 20px 20px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.admin-table th {
+  background-color: #F1F5F9;
+  color: var(--socadel-text-main);
+  font-weight: 600;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--socadel-sidebar-border);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.admin-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #EDF2F7;
+  vertical-align: middle;
+}
+
+.admin-table tr:hover td {
+  background-color: #F8FAFC;
+}
+
+/* Level Indentation in Admin Table */
+.tree-node-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.level-indent-0 { padding-left: 0; font-weight: 700; color: #1A1A1A; }
+.level-indent-1 { padding-left: 20px; font-weight: 600; color: #2C3E50; }
+.level-indent-2 { padding-left: 40px; font-weight: 400; color: #4A5568; }
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.badge-level-1 { background-color: rgba(21, 101, 168, 0.12); color: var(--socadel-blue); }
+.badge-level-2 { background-color: rgba(124, 179, 66, 0.15); color: #558B2F; }
+.badge-level-3 { background-color: #EDF2F7; color: #4A5568; }
+
+.badge-active { background-color: #E8F5E9; color: #2E7D32; }
+.badge-inactive { background-color: #FFEBEE; color: #C62828; }
+.badge-engine { background-color: #FFF3E0; color: #E65100; font-weight: 600; }
+
+/* Table Action Buttons */
+.btn-table-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  background: none;
+}
+
+.btn-table-edit {
+  color: var(--socadel-blue);
+  border-color: rgba(21, 101, 168, 0.3);
+}
+
+.btn-table-edit:hover {
+  background-color: var(--socadel-blue-light);
+}
+
+.btn-table-delete {
+  color: #D32F2F;
+  border-color: rgba(211, 47, 47, 0.3);
+}
+
+.btn-table-delete:hover {
+  background-color: #FFEBEE;
+}
+
+.btn-table-add {
+  color: var(--socadel-green);
+  border-color: rgba(124, 179, 66, 0.4);
+}
+
+.btn-table-add:hover {
+  background-color: var(--socadel-green-light);
+}
+
+/* Modal Overlay & Card */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-dialog {
+  background-color: #FFFFFF;
+  border-radius: var(--radius-md);
+  width: 520px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--socadel-sidebar-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--socadel-blue);
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #888;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--socadel-text-main);
+  margin-bottom: 5px;
+}
+
+.form-control {
+  width: 100%;
+  height: 36px;
+  padding: 6px 12px;
+  border: 1px solid #D5DCE2;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--socadel-text-main);
+  background-color: #FFFFFF;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-control:focus {
+  border-color: var(--socadel-blue);
+  box-shadow: 0 0 0 2px rgba(21, 101, 168, 0.15);
+}
+
+.form-control-textarea {
+  height: 70px;
+  resize: vertical;
+}
+
+.modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--socadel-sidebar-border);
+  background-color: #F8FAFC;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Tooltip helper */
+.chart-tooltip {
+  position: absolute;
+  padding: 6px 10px;
+  background: rgba(33, 33, 33, 0.9);
+  color: #FFF;
+  border-radius: 4px;
+  font-size: 11.5px;
+  pointer-events: none;
+  z-index: 100;
+  display: none;
+  white-space: nowrap;
+}
+
+/* Fullscreen mode helper */
+.report-workspace.is-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  z-index: 9999;
+  border-radius: 0;
+  border: none;
+}
+
+/* Spin animation for refresh button */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.rotating {
+  animation: spin 0.6s linear infinite;
+}

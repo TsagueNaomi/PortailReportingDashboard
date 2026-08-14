@@ -1,0 +1,183 @@
+@page
+@model PortailSocadel.Pages.IndexModel
+@{
+}
+
+@if (Model.IsHome)
+{
+    <!-- =========================================================================
+         INTERFACE 02: ÉCRAN D'ACCUEIL PAR DÉFAUT (interface-02-accueil.png)
+         ========================================================================= -->
+    <div class="welcome-screen-container">
+        <!-- Centered Welcome Icon Box -->
+        <div class="welcome-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Mini Bar Chart Graphic -->
+                <rect x="10" y="24" width="6" height="16" rx="1.5" fill="#E53935" />
+                <rect x="21" y="14" width="6" height="26" rx="1.5" fill="#1E88E5" />
+                <rect x="32" y="19" width="6" height="21" rx="1.5" fill="#43A047" />
+            </svg>
+        </div>
+
+        <!-- Heading & Instruction Text -->
+        <h1 class="welcome-heading">Bienvenue sur le portail de reporting</h1>
+        <p class="welcome-subtext">Sélectionnez un rapport dans le menu à gauche pour commencer, ou utilisez la barre de recherche</p>
+
+        <!-- 3 Clickable Shortcut Cards -->
+        <div class="welcome-shortcuts-grid">
+            <a href="/?report=rep-rec-a" class="shortcut-box" title="Consulter le rapport de recouvrement">
+                <span class="shortcut-box-category">Recouvrement</span>
+                <span class="shortcut-box-report">Rapport A</span>
+            </a>
+
+            <a href="/?report=rep-fac-a" class="shortcut-box" title="Consulter le rapport de facturation">
+                <span class="shortcut-box-category">Facturation</span>
+                <span class="shortcut-box-report">Rapport A</span>
+            </a>
+
+            <a href="/?report=rep-enc-a" class="shortcut-box" title="Consulter le rapport d'encaissement">
+                <span class="shortcut-box-category">Encaissement</span>
+                <span class="shortcut-box-report">Rapport A</span>
+            </a>
+        </div>
+    </div>
+}
+else if (Model.IsError)
+{
+    <!-- =========================================================================
+         INTERFACE 03: ÉTAT D'ERREUR DE CHARGEMENT (interface-03-erreur.png)
+         ========================================================================= -->
+    <div class="error-screen-container">
+        <!-- Warning Triangle Icon -->
+        <div class="error-warning-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+        </div>
+
+        <!-- Error Messages -->
+        <h2 class="error-main-title">Impossible de charger le rapport.</h2>
+        <p class="error-sub-title">Veuillez réessayer.</p>
+
+        <!-- Green Action Button -->
+        <a href="/?report=@(Model.ReportId ?? "rep-rec-a")" class="btn-retry-action">
+            Réessayer
+        </a>
+    </div>
+}
+else
+{
+    <!-- =========================================================================
+         INTERFACE 01: RAPPORT ACTIF SÉLECTIONNÉ ET AFFICHÉ (interface-01-rapport-actif.png)
+         ========================================================================= -->
+    <div class="pbi-report-container">
+        <!-- Top Dark Bar: Power BI Header -->
+        <div class="pbi-top-bar">
+            <span>Power BI</span>
+            <span>Power BI report dashboard</span>
+        </div>
+
+        <!-- Dashboard Grid with 6 Visual Tiles (2 Rows x 3 Columns) -->
+        <div class="pbi-dashboard-body">
+            <!-- TILE 1: Line Chart Visual -->
+            <div class="pbi-tile" title="Évolution temporelle">
+                <div class="line-chart-container">
+                    <svg class="line-chart-svg" viewBox="0 0 320 160" preserveAspectRatio="none">
+                        <!-- Grid lines -->
+                        <line x1="10" y1="30" x2="310" y2="30" stroke="#F0F3F6" stroke-width="1" />
+                        <line x1="10" y1="70" x2="310" y2="70" stroke="#F0F3F6" stroke-width="1" />
+                        <line x1="10" y1="110" x2="310" y2="110" stroke="#F0F3F6" stroke-width="1" />
+                        <line x1="10" y1="150" x2="310" y2="150" stroke="#F0F3F6" stroke-width="1" />
+
+                        <!-- Blue Line (#2F76B1) -->
+                        <polyline fill="none" stroke="#2F76B1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                  points="15,120 60,95 105,115 150,80 195,50 240,75 285,55 305,65" />
+                        
+                        <!-- Green Line (#8ABB56) -->
+                        <polyline fill="none" stroke="#8ABB56" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                  points="15,135 60,110 105,100 150,110 195,90 240,65 285,45 305,50" />
+
+                        <!-- Blue Data Dots -->
+                        <circle cx="15" cy="120" r="3.5" fill="#2F76B1" />
+                        <circle cx="60" cy="95" r="3.5" fill="#2F76B1" />
+                        <circle cx="105" cy="115" r="3.5" fill="#2F76B1" />
+                        <circle cx="150" cy="80" r="3.5" fill="#2F76B1" />
+                        <circle cx="195" cy="50" r="3.5" fill="#2F76B1" />
+                        <circle cx="240" cy="75" r="3.5" fill="#2F76B1" />
+                        <circle cx="285" cy="55" r="3.5" fill="#2F76B1" />
+
+                        <!-- Green Data Dots -->
+                        <circle cx="15" cy="135" r="3.5" fill="#8ABB56" />
+                        <circle cx="60" cy="110" r="3.5" fill="#8ABB56" />
+                        <circle cx="105" cy="100" r="3.5" fill="#8ABB56" />
+                        <circle cx="150" cy="110" r="3.5" fill="#8ABB56" />
+                        <circle cx="195" cy="90" r="3.5" fill="#8ABB56" />
+                        <circle cx="240" cy="65" r="3.5" fill="#8ABB56" />
+                        <circle cx="285" cy="45" r="3.5" fill="#8ABB56" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- TILE 2: Vertical Bar Chart Visual -->
+            <div class="pbi-tile" title="Répartition par segment">
+                <div class="v-bar-container">
+                    <div class="v-bar blue" style="height: 35%;" data-label="Janvier" data-val="35 K"></div>
+                    <div class="v-bar green" style="height: 52%;" data-label="Février" data-val="52 K"></div>
+                    <div class="v-bar blue" style="height: 72%;" data-label="Mars" data-val="72 K"></div>
+                    <div class="v-bar green" style="height: 85%;" data-label="Avril" data-val="85 K"></div>
+                    <div class="v-bar blue" style="height: 60%;" data-label="Mai" data-val="60 K"></div>
+                    <div class="v-bar green" style="height: 42%;" data-label="Juin" data-val="42 K"></div>
+                    <div class="v-bar blue" style="height: 25%;" data-label="Juillet" data-val="25 K"></div>
+                    <div class="v-bar green" style="height: 38%;" data-label="Août" data-val="38 K"></div>
+                </div>
+            </div>
+
+            <!-- TILE 3: Horizontal Bar Chart Visual -->
+            <div class="pbi-tile" title="Performance par région">
+                <div class="h-bar-container">
+                    <div class="h-bar-row" style="justify-content: flex-end;">
+                        <div class="h-bar blue" style="width: 82%;" data-label="Littoral" data-val="82 %"></div>
+                    </div>
+                    <div class="h-bar-row" style="justify-content: flex-end;">
+                        <div class="h-bar green" style="width: 50%;" data-label="Centre" data-val="50 %"></div>
+                    </div>
+                    <div class="h-bar-row" style="justify-content: flex-start;">
+                        <div class="h-bar blue" style="width: 92%;" data-label="Ouest" data-val="92 %"></div>
+                    </div>
+                    <div class="h-bar-row" style="justify-content: flex-end;">
+                        <div class="h-bar green" style="width: 62%;" data-label="Nord" data-val="62 %"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TILE 4: Vertical Bar Chart Visual (Bottom Left) -->
+            <div class="pbi-tile" title="Volumes traités">
+                <div class="v-bar-container">
+                    <div class="v-bar blue" style="height: 22%;" data-label="Semaine 1" data-val="22 K"></div>
+                    <div class="v-bar green" style="height: 38%;" data-label="Semaine 2" data-val="38 K"></div>
+                    <div class="v-bar blue" style="height: 56%;" data-label="Semaine 3" data-val="56 K"></div>
+                    <div class="v-bar green" style="height: 72%;" data-label="Semaine 4" data-val="72 K"></div>
+                    <div class="v-bar green" style="height: 94%;" data-label="Semaine 5" data-val="94 K"></div>
+                    <div class="v-bar blue" style="height: 62%;" data-label="Semaine 6" data-val="62 K"></div>
+                    <div class="v-bar green" style="height: 48%;" data-label="Semaine 7" data-val="48 K"></div>
+                </div>
+            </div>
+
+            <!-- TILE 5: KPI Card (73.9K / Total recouvré) -->
+            <div class="pbi-tile" title="Total recouvré">
+                <div class="kpi-container">
+                    <div class="kpi-main-number">73.9K</div>
+                    <div class="kpi-caption">Total recouvré</div>
+                </div>
+            </div>
+
+            <!-- TILE 6: KPI Card (+1.6% / Évolution mensuelle) -->
+            <div class="pbi-tile" title="Évolution mensuelle">
+                <div class="kpi-container">
+                    <div class="kpi-main-number green-accent">+1.6%</div>
+                    <div class="kpi-caption">Évolution mensuelle</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
