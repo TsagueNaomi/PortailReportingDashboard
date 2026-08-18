@@ -3,6 +3,7 @@
     var tree = NavService.GetMenuTree();
     var activeReportId = ViewData["ActiveReportId"]?.ToString() ?? Context.Request.Query["report"].ToString();
     var isHome = string.IsNullOrEmpty(activeReportId) && (ViewData["IsHome"] as bool? == true || Context.Request.Path == "/" && !Context.Request.Query.ContainsKey("report"));
+    var isExplore = ViewData["IsExplore"] as bool? == true;
     var isError = ViewData["IsError"] as bool? == true;
     var isAdmin = Context.Request.Path.StartsWithSegments("/Admin") || ViewData["IsAdmin"] as bool? == true;
 
@@ -40,11 +41,11 @@
     <link rel="stylesheet" href="~/css/portal.css" asp-append-version="true" />
 </head>
 <body>
-    <div class="app-container">
+    <div class="app-container@(!isHome && !isExplore ? "" : (isHome ? " app-container--home" : ""))">
         <!-- =================================================================
              1. LEFT SIDEBAR NAVIGATION (~22% width, exact SOCADEL structure)
              ================================================================= -->
-        <aside class="app-sidebar">
+        <aside class="app-sidebar@(isHome ? " app-sidebar--hidden" : "")">
             <!-- 1.1 SOCADEL Official Logo -->
             <div class="sidebar-header">
                 <a href="/" class="sidebar-logo-link" title="Accueil Portail SOCADEL">

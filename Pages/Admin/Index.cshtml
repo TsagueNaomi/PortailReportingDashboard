@@ -6,7 +6,7 @@
 }
 
 <div class="admin-view-container">
-    <!-- Header Strip -->
+    <!-- Header Strip: Title Section -->
     <div class="admin-header-strip">
         <div class="admin-title-area">
             <div class="admin-title-badge">
@@ -18,47 +18,49 @@
                 <span>Console Back-Office &bull; Gestion Décisionnelle</span>
             </div>
             <h2>Administration de l'Arborescence & des Rapports</h2>
-            <p>Pilotez la structure à 3 niveaux : Processus de premier niveau, Sous-menus et Rapports décisionnels.</p>
+            <p>Nouveau menu • Nouveau sous-menu • Nouveau rapport</p>
         </div>
+    </div>
 
-        <div class="admin-top-actions">
-            <!-- 3 Level Quick Add Buttons -->
-            <button type="button" class="btn-admin-action level1" onclick="openAddModalWithLevel('1')" title="Ajouter un nouveau processus de niveau 1">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
+    <!-- Action Bar: Quick Add Buttons -->
+    <div class="admin-action-bar">
+        <button type="button" class="btn-admin-action level1" onclick="openAddModalWithLevel('1')" title="Ajouter un nouveau menu">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>+ Nouveau Menu</span>
+        </button>
+
+        <button type="button" class="btn-admin-action level2" onclick="openAddModalWithLevel('2')" title="Ajouter un nouveau sous-menu">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>+ Nouveau Sous-menu</span>
+        </button>
+
+        <button type="button" class="btn-admin-action level3" onclick="openAddModalWithLevel('3')" title="Ajouter un nouveau rapport">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>+ Nouveau Rapport</span>
+        </button>
+
+        <div style="flex: 1;"></div>
+
+        <form method="post" asp-page-handler="Reset" style="display:inline;" onsubmit="return confirm('Attention : Êtes-vous sûr de vouloir réinitialiser l\'ensemble de l\'arborescence aux données par défaut de SOCADEL ?');">
+            <button type="submit" class="btn-admin-reset" title="Réinitialiser l'arborescence par défaut">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                    <path d="M21 3v5h-5"></path>
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                    <path d="M8 16H3v5"></path>
                 </svg>
-                <span>+ Nouveau Processus (Niv. 1)</span>
+                <span>Réinitialiser par défaut</span>
             </button>
-
-            <button type="button" class="btn-admin-action level2" onclick="openAddModalWithLevel('2')" title="Ajouter un sous-menu de niveau 2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                <span>+ Nouveau Sous-menu (Niv. 2)</span>
-            </button>
-
-            <button type="button" class="btn-admin-action level3" onclick="openAddModalWithLevel('3')" title="Ajouter un rapport de niveau 3">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                <span>+ Nouveau Rapport (Niv. 3)</span>
-            </button>
-
-            <form method="post" asp-page-handler="Reset" style="display:inline;" onsubmit="return confirm('Attention : Êtes-vous sûr de vouloir réinitialiser l\'ensemble de l\'arborescence aux données par défaut de SOCADEL ?');">
-                <button type="submit" class="btn-admin-reset" title="Réinitialiser l'arborescence par défaut">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
-                        <path d="M21 3v5h-5"></path>
-                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
-                        <path d="M8 16H3v5"></path>
-                    </svg>
-                    <span>Réinitialiser par défaut</span>
-                </button>
-            </form>
-        </div>
+        </form>
     </div>
 
     <!-- Alert Notifications -->
@@ -93,7 +95,7 @@
     <div class="admin-stats-grid">
         <div class="admin-stat-card">
             <div class="admin-stat-header">
-                <span class="admin-stat-label">Processus (Niveau 1)</span>
+                <span class="admin-stat-label">Nouveau Menu</span>
                 <span class="admin-stat-icon blue">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
@@ -101,12 +103,11 @@
                 </span>
             </div>
             <span class="admin-stat-val blue">@Model.TotalCategories</span>
-            <span class="admin-stat-meta">Domaines métiers principaux</span>
         </div>
 
         <div class="admin-stat-card">
             <div class="admin-stat-header">
-                <span class="admin-stat-label">Sous-menus (Niveau 2)</span>
+                <span class="admin-stat-label">Nouveau Sous-menu</span>
                 <span class="admin-stat-icon green">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
@@ -116,12 +117,11 @@
                 </span>
             </div>
             <span class="admin-stat-val green">@Model.TotalSubCategories</span>
-            <span class="admin-stat-meta">Sous-processus opérationnels</span>
         </div>
 
         <div class="admin-stat-card">
             <div class="admin-stat-header">
-                <span class="admin-stat-label">Rapports (Niveau 3)</span>
+                <span class="admin-stat-label">Nouveau Rapport</span>
                 <span class="admin-stat-icon gray">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -131,26 +131,6 @@
                 </span>
             </div>
             <span class="admin-stat-val dark">@Model.TotalReports</span>
-            <span class="admin-stat-meta">Tableaux de bord configurés</span>
-        </div>
-
-        <div class="admin-stat-card">
-            <div class="admin-stat-header">
-                <span class="admin-stat-label">Moteurs de Restitution</span>
-                <span class="admin-stat-icon amber">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="20" x2="18" y2="10"></line>
-                        <line x1="12" y1="20" x2="12" y2="4"></line>
-                        <line x1="6" y1="20" x2="6" y2="14"></line>
-                    </svg>
-                </span>
-            </div>
-            <div class="admin-engines-summary">
-                <span>Power BI : <strong>@Model.TotalPowerBI</strong></span>
-                <span>SSRS : <strong>@Model.TotalSSRS</strong></span>
-                <span>Excel : <strong>@Model.TotalExcel</strong></span>
-            </div>
-            <span class="admin-stat-meta">Connecteurs décisionnels</span>
         </div>
     </div>
 
@@ -248,7 +228,7 @@
                                     </svg>
                                     <span>+ Sous-menu</span>
                                 </button>
-                                <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@cat.Id', '@cat.Title', '', '1', '@cat.Order', 'PowerBI', '@(cat.Description ?? "")', '@(cat.Code ?? "")', false, @(cat.IsActive ? "true" : "false"))" title="Modifier ce processus">
+                                <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@cat.Id', '@cat.Title', '', '1', '@(cat.Description ?? "")')" title="Modifier ce processus">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -322,7 +302,7 @@
                                         </svg>
                                         <span>+ Rapport</span>
                                     </button>
-                                    <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@sub.Id', '@sub.Title', '@cat.Id', '2', '@sub.Order', 'PowerBI', '@(sub.Description ?? "")', '@(sub.Code ?? "")', false, @(sub.IsActive ? "true" : "false"))" title="Modifier ce sous-menu">
+                                    <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@sub.Id', '@sub.Title', '@cat.Id', '2', '@(sub.Description ?? "")')" title="Modifier ce sous-menu">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -407,7 +387,7 @@
                                             </svg>
                                             <span>Ouvrir</span>
                                         </a>
-                                        <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@report.Id', '@report.Title', '@sub.Id', '3', '@report.Order', '@report.Engine', '@(report.Description ?? "")', '@(report.Code ?? "")', @(report.SimulateError ? "true" : "false"), @(report.IsActive ? "true" : "false"))" title="Modifier ce rapport">
+                                        <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@report.Id', '@report.Title', '@sub.Id', '3', '@(report.Description ?? "")')" title="Modifier ce rapport">
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -450,14 +430,7 @@
         </div>
         <form method="post" asp-page-handler="Add">
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label" for="addItemType">Niveau & Type d'élément *</label>
-                    <select id="addItemType" name="ItemInput.Type" class="form-control" onchange="toggleAddParentSelector()">
-                        <option value="1">Niveau 1 — Processus / Domaine (Ex: Commercial, Finance, Technique...)</option>
-                        <option value="2">Niveau 2 — Sous-menu (Ex: Encaissement, Facturation, Trésorerie...)</option>
-                        <option value="3" selected>Niveau 3 — Rapport décisionnel (Nom libre)</option>
-                    </select>
-                </div>
+                <input type="hidden" id="addItemType" name="ItemInput.Type" value="3" />
 
                 <div class="form-group" id="addGroupParent">
                     <label class="form-label" for="addItemParentId">Élément parent *</label>
@@ -470,7 +443,7 @@
                                 <option value="@sub.Id">@label</option>
                             }
                         </optgroup>
-                        <optgroup label="-- Processus de niveau 1 (pour les Sous-menus Niv. 2) --" id="optgroupCategories">
+                        <optgroup label="-- Menus de niveau 1 (pour les Sous-Menus Niv. 2) --" id="optgroupCategories">
                             @foreach (var cat in Model.CategoryOptions)
                             {
                                 <option value="@cat.Id">@cat.Title</option>
@@ -479,47 +452,14 @@
                     </select>
                 </div>
 
-                <div class="form-row-2col">
-                    <div class="form-group">
-                        <label class="form-label" for="addItemTitle">Intitulé de l'élément *</label>
-                        <input type="text" id="addItemTitle" name="ItemInput.Title" class="form-control" placeholder="Ex: Taux de recouvrement, Facturation..." required />
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="addItemCode">Code de référence</label>
-                        <input type="text" id="addItemCode" name="ItemInput.Code" class="form-control" placeholder="Ex: REP-REC-01, DIR-COMM..." />
-                    </div>
-                </div>
-
-                <div class="form-group" id="addGroupEngine">
-                    <label class="form-label" for="addItemEngine">Moteur de reporting</label>
-                    <select id="addItemEngine" name="ItemInput.Engine" class="form-control">
-                        <option value="PowerBI">Microsoft Power BI Embedded</option>
-                        <option value="SSRS">SQL Server Reporting Services (SSRS)</option>
-                        <option value="Excel">Tableau de bord interactif Excel</option>
-                        <option value="Custom">Graphique personnalisé</option>
-                    </select>
-                </div>
-
-                <div class="form-row-2col">
-                    <div class="form-group">
-                        <label class="form-label" for="addItemOrder">Ordre d'affichage</label>
-                        <input type="number" id="addItemOrder" name="ItemInput.Order" class="form-control" value="1" min="1" max="99" />
-                    </div>
-                    <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;">
-                        <label class="form-checkbox-label">
-                            <input type="checkbox" name="ItemInput.IsActive" value="true" checked />
-                            <span>Élément actif</span>
-                        </label>
-                        <label class="form-checkbox-label" id="addSimulateErrorGroup">
-                            <input type="checkbox" name="ItemInput.SimulateError" value="true" />
-                            <span style="color: var(--socadel-warning); font-weight: 600;">Simuler état d'erreur (Démonstration)</span>
-                        </label>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label" for="addItemTitle">Intitulé de l'élément *</label>
+                    <input type="text" id="addItemTitle" name="ItemInput.Title" class="form-control" placeholder="Ex: Commercial, Encaissement, Taux de recouvrement..." required />
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="addItemDescription">Description / Note métier</label>
-                    <textarea id="addItemDescription" name="ItemInput.Description" class="form-control form-control-textarea" placeholder="Description de l'indicateur ou périmètre du rapport..."></textarea>
+                    <textarea id="addItemDescription" name="ItemInput.Description" class="form-control form-control-textarea" placeholder="Description détaillée..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -547,27 +487,19 @@
         </div>
         <form method="post" asp-page-handler="Edit">
             <input type="hidden" id="editItemId" name="ItemInput.Id" />
+            <input type="hidden" id="editItemType" name="ItemInput.Type" value="3" />
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label" for="editItemType">Niveau & Type d'élément</label>
-                    <select id="editItemType" name="ItemInput.Type" class="form-control" onchange="toggleEditParentSelector()">
-                        <option value="1">Niveau 1 — Processus (Catégorie racine)</option>
-                        <option value="2">Niveau 2 — Sous-menu</option>
-                        <option value="3">Niveau 3 — Rapport décisionnel</option>
-                    </select>
-                </div>
-
                 <div class="form-group" id="editGroupParent">
                     <label class="form-label" for="editItemParentId">Élément parent</label>
                     <select id="editItemParentId" name="ItemInput.ParentId" class="form-control">
                         <option value="">-- Aucun parent (Racine) --</option>
-                        <optgroup label="Processus (Niveau 1)" id="editOptgroupCat">
+                        <optgroup label="Menus (Niveau 1)" id="editOptgroupCat">
                             @foreach (var cat in Model.CategoryOptions)
                             {
                                 <option value="@cat.Id">@cat.Title</option>
                             }
                         </optgroup>
-                        <optgroup label="Sous-menus (Niveau 2)" id="editOptgroupSub">
+                        <optgroup label="Sous-Menus (Niveau 2)" id="editOptgroupSub">
                             @foreach (var sub in Model.SubCategoryOptions)
                             {
                                 var parentCat = Model.CategoryOptions.FirstOrDefault(c => c.Id == sub.ParentId);
@@ -578,46 +510,13 @@
                     </select>
                 </div>
 
-                <div class="form-row-2col">
-                    <div class="form-group">
-                        <label class="form-label" for="editItemTitle">Intitulé de l'élément *</label>
-                        <input type="text" id="editItemTitle" name="ItemInput.Title" class="form-control" required />
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="editItemCode">Code de référence</label>
-                        <input type="text" id="editItemCode" name="ItemInput.Code" class="form-control" />
-                    </div>
-                </div>
-
-                <div class="form-group" id="editGroupEngine">
-                    <label class="form-label" for="editItemEngine">Moteur de reporting</label>
-                    <select id="editItemEngine" name="ItemInput.Engine" class="form-control">
-                        <option value="PowerBI">Microsoft Power BI Embedded</option>
-                        <option value="SSRS">SQL Server Reporting Services (SSRS)</option>
-                        <option value="Excel">Tableau de bord interactif Excel</option>
-                        <option value="Custom">Graphique personnalisé</option>
-                    </select>
-                </div>
-
-                <div class="form-row-2col">
-                    <div class="form-group">
-                        <label class="form-label" for="editItemOrder">Ordre d'affichage</label>
-                        <input type="number" id="editItemOrder" name="ItemInput.Order" class="form-control" min="1" max="99" />
-                    </div>
-                    <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;">
-                        <label class="form-checkbox-label">
-                            <input type="checkbox" id="editItemIsActive" name="ItemInput.IsActive" value="true" />
-                            <span>Élément actif</span>
-                        </label>
-                        <label class="form-checkbox-label" id="editSimulateErrorGroup">
-                            <input type="checkbox" id="editItemSimulateError" name="ItemInput.SimulateError" value="true" />
-                            <span style="color: var(--socadel-warning); font-weight: 600;">Simuler état d'erreur (Démonstration)</span>
-                        </label>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label" for="editItemTitle">Intitulé de l'élément *</label>
+                    <input type="text" id="editItemTitle" name="ItemInput.Title" class="form-control" required />
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="editItemDescription">Description / Note</label>
+                    <label class="form-label" for="editItemDescription">Description / Note métier</label>
                     <textarea id="editItemDescription" name="ItemInput.Description" class="form-control form-control-textarea"></textarea>
                 </div>
             </div>
@@ -632,24 +531,17 @@
 @section Scripts {
     <script>
         function toggleAddParentSelector() {
-            const typeSelect = document.getElementById('addItemType');
+            const typeInput = document.getElementById('addItemType');
             const parentGroup = document.getElementById('addGroupParent');
-            const engineGroup = document.getElementById('addGroupEngine');
-            const errGroup = document.getElementById('addSimulateErrorGroup');
             const optSub = document.getElementById('optgroupSubCategories');
             const optCat = document.getElementById('optgroupCategories');
 
-            if (typeSelect.value === '1') {
+            if (typeInput.value === '1') {
                 parentGroup.style.display = 'none';
-                engineGroup.style.display = 'none';
-                if (errGroup) errGroup.style.display = 'none';
-            } else if (typeSelect.value === '2') {
+            } else if (typeInput.value === '2') {
                 parentGroup.style.display = 'block';
                 optCat.style.display = '';
                 optSub.style.display = 'none';
-                engineGroup.style.display = 'none';
-                if (errGroup) errGroup.style.display = 'none';
-                // Pick first cat if needed
                 if (optCat.children.length > 0) {
                     document.getElementById('addItemParentId').value = optCat.children[0].value;
                 }
@@ -657,9 +549,6 @@
                 parentGroup.style.display = 'block';
                 optCat.style.display = 'none';
                 optSub.style.display = '';
-                engineGroup.style.display = 'block';
-                if (errGroup) errGroup.style.display = 'flex';
-                // Pick first sub if needed
                 if (optSub.children.length > 0) {
                     document.getElementById('addItemParentId').value = optSub.children[0].value;
                 }
@@ -667,52 +556,37 @@
         }
 
         function toggleEditParentSelector() {
-            const typeSelect = document.getElementById('editItemType');
+            const typeInput = document.getElementById('editItemType');
             const parentGroup = document.getElementById('editGroupParent');
-            const engineGroup = document.getElementById('editGroupEngine');
-            const errGroup = document.getElementById('editSimulateErrorGroup');
             const optSub = document.getElementById('editOptgroupSub');
             const optCat = document.getElementById('editOptgroupCat');
 
-            if (typeSelect.value === '1') {
+            if (typeInput.value === '1') {
                 parentGroup.style.display = 'none';
-                engineGroup.style.display = 'none';
-                if (errGroup) errGroup.style.display = 'none';
-            } else if (typeSelect.value === '2') {
+            } else if (typeInput.value === '2') {
                 parentGroup.style.display = 'block';
                 optCat.style.display = '';
                 optSub.style.display = 'none';
-                engineGroup.style.display = 'none';
-                if (errGroup) errGroup.style.display = 'none';
             } else {
                 parentGroup.style.display = 'block';
                 optCat.style.display = 'none';
                 optSub.style.display = '';
-                engineGroup.style.display = 'block';
-                if (errGroup) errGroup.style.display = 'flex';
             }
         }
 
         window.openAddModalWithLevel = function(level) {
             document.getElementById('addItemType').value = level;
             document.getElementById('addItemTitle').value = '';
-            document.getElementById('addItemCode').value = '';
             document.getElementById('addItemDescription').value = '';
-            document.getElementById('addItemOrder').value = '1';
             toggleAddParentSelector();
             openAdminModal('modalAddItem');
         };
 
-        window.openEditModal = function(id, title, parentId, type, order, engine, description, code, simError, isActive) {
+        window.openEditModal = function(id, title, parentId, type, description) {
             document.getElementById('editItemId').value = id || '';
             document.getElementById('editItemTitle').value = title || '';
-            document.getElementById('editItemCode').value = code || '';
             document.getElementById('editItemType').value = type || '3';
-            document.getElementById('editItemOrder').value = order || '1';
-            document.getElementById('editItemEngine').value = engine || 'PowerBI';
             document.getElementById('editItemDescription').value = description || '';
-            document.getElementById('editItemIsActive').checked = isActive !== false;
-            document.getElementById('editItemSimulateError').checked = !!simError;
             
             toggleEditParentSelector();
             document.getElementById('editItemParentId').value = parentId || '';

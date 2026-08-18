@@ -17,8 +17,10 @@ namespace PortailSocadel.Pages
         public string? ReportId { get; set; }
         public MenuItem? CurrentReport { get; set; }
         public bool IsHome { get; set; }
+        public bool IsExplore { get; set; }
         public bool IsError { get; set; }
         public List<string> Breadcrumbs { get; set; } = new();
+        public List<MenuItem> FeaturedReports { get; set; } = new();
 
         public void OnGet([FromQuery] string? report)
         {
@@ -30,6 +32,16 @@ namespace PortailSocadel.Pages
                 ViewData["Title"] = "Accueil";
                 ViewData["IsHome"] = true;
                 Breadcrumbs = new List<string> { "Portail", "Accueil" };
+                
+                // Load featured reports for homepage
+                LoadFeaturedReports();
+            }
+            else if (ReportId.Equals("explore", StringComparison.OrdinalIgnoreCase))
+            {
+                IsExplore = true;
+                ViewData["Title"] = "Exploration du portail";
+                ViewData["IsExplore"] = true;
+                Breadcrumbs = new List<string> { "Portail", "Exploration" };
             }
             else
             {
@@ -64,6 +76,25 @@ namespace PortailSocadel.Pages
                     Breadcrumbs = new List<string> { "Commercial", CurrentReport.Title };
                 }
             }
+        }
+
+        private void LoadFeaturedReports()
+        {
+            // Get all reports from navigation service
+            var allItems = _navService.GetAllFlatItems();
+            var allReports = allItems
+                .Where(i => i.Type == ItemType.Report && i.IsActive && !i.SimulateError)
+                .ToList();
+
+            // Randomly select 10-12 reports (or fewer if not enough available)
+            int targetCount = Math.Min(10, Math.Max(8, allReports.Count));
+            Random random = new Random();
+            
+            FeaturedReports = allReports
+                .OrderBy(x => random.Next())
+                .Take(targetCount)
+                .OrderBy(r => r.Title)
+                .ToList();
         }
     }
 }
