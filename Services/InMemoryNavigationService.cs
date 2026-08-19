@@ -387,6 +387,7 @@ namespace PortailSocadel.Services
                 IsActive = source.IsActive,
                 Engine = source.Engine,
                 Description = source.Description,
+                ReportUrl = source.ReportUrl,
                 Code = source.Code,
                 SimulateError = source.SimulateError,
                 CreatedAt = source.CreatedAt,
@@ -437,6 +438,24 @@ namespace PortailSocadel.Services
                 {
                     item.Id = Guid.NewGuid().ToString("N")[..8];
                 }
+
+                // If adding a Level 1 Category, ensure order goes to the bottom of the list
+                if (item.Type == ItemType.Category)
+                {
+                    var maxCatOrder = _items.Where(i => i.Type == ItemType.Category).Select(i => i.Order).DefaultIfEmpty(0).Max();
+                    item.Order = maxCatOrder + 1;
+                }
+                else if (item.Type == ItemType.SubCategory)
+                {
+                    var maxSubOrder = _items.Where(i => i.Type == ItemType.SubCategory && i.ParentId == item.ParentId).Select(i => i.Order).DefaultIfEmpty(0).Max();
+                    item.Order = maxSubOrder + 1;
+                }
+                else if (item.Type == ItemType.Report)
+                {
+                    var maxRepOrder = _items.Where(i => i.Type == ItemType.Report && i.ParentId == item.ParentId).Select(i => i.Order).DefaultIfEmpty(0).Max();
+                    item.Order = maxRepOrder + 1;
+                }
+
                 item.CreatedAt = DateTime.UtcNow;
                 item.UpdatedAt = DateTime.UtcNow;
                 _items.Add(CloneItem(item));
@@ -457,6 +476,7 @@ namespace PortailSocadel.Services
                 existing.IsActive = item.IsActive;
                 existing.Engine = item.Engine;
                 existing.Description = item.Description;
+                existing.ReportUrl = item.ReportUrl;
                 existing.Code = item.Code;
                 existing.SimulateError = item.SimulateError;
                 existing.UpdatedAt = DateTime.UtcNow;
@@ -508,18 +528,23 @@ namespace PortailSocadel.Services
 
         public List<string> GetBreadcrumbPath(string itemId)
         {
+            return GetBreadcrumbNodes(itemId).Select(i => i.Title).ToList();
+        }
+
+        public List<MenuItem> GetBreadcrumbNodes(string itemId)
+        {
             lock (_lock)
             {
-                var path = new List<string>();
+                var list = new List<MenuItem>();
                 var current = _items.FirstOrDefault(i => i.Id == itemId);
                 while (current != null)
                 {
-                    path.Insert(0, current.Title);
+                    list.Insert(0, CloneItem(current));
                     current = !string.IsNullOrEmpty(current.ParentId)
                         ? _items.FirstOrDefault(i => i.Id == current.ParentId)
                         : null;
                 }
-                return path;
+                return list;
             }
         }
 

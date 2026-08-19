@@ -13,6 +13,7 @@ namespace PortailSocadel.Services
         bool DeleteItem(string id);
         List<MenuItem> SearchItems(string query);
         List<string> GetBreadcrumbPath(string itemId);
+        List<MenuItem> GetBreadcrumbNodes(string itemId);
         void ResetToDefault();
     }
 }

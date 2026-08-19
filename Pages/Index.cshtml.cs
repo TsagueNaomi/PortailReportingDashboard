@@ -26,22 +26,16 @@ namespace PortailSocadel.Pages
         {
             ReportId = report;
 
-            if (string.IsNullOrEmpty(ReportId) || ReportId.Equals("home", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(ReportId) || ReportId.Equals("home", StringComparison.OrdinalIgnoreCase))
             {
                 IsHome = true;
+                CurrentReport = null;
                 ViewData["Title"] = "Accueil";
                 ViewData["IsHome"] = true;
                 Breadcrumbs = new List<string> { "Portail", "Accueil" };
                 
                 // Load featured reports for homepage
                 LoadFeaturedReports();
-            }
-            else if (ReportId.Equals("explore", StringComparison.OrdinalIgnoreCase))
-            {
-                IsExplore = true;
-                ViewData["Title"] = "Exploration du portail";
-                ViewData["IsExplore"] = true;
-                Breadcrumbs = new List<string> { "Portail", "Exploration" };
             }
             else
             {
@@ -80,15 +74,15 @@ namespace PortailSocadel.Pages
 
         private void LoadFeaturedReports()
         {
-            // Get all reports from navigation service
+            // Get all active reports from navigation service
             var allItems = _navService.GetAllFlatItems();
             var allReports = allItems
-                .Where(i => i.Type == ItemType.Report && i.IsActive && !i.SimulateError)
+                .Where(i => i.Type == ItemType.Report && i.IsActive)
                 .ToList();
 
-            // Randomly select 10-12 reports (or fewer if not enough available)
-            int targetCount = Math.Min(10, Math.Max(8, allReports.Count));
+            // Randomly select between 8 and 12 reports (or all if total < 8)
             Random random = new Random();
+            int targetCount = Math.Min(allReports.Count, Math.Max(8, random.Next(8, 13)));
             
             FeaturedReports = allReports
                 .OrderBy(x => random.Next())

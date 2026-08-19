@@ -2,7 +2,7 @@
 @{
     var tree = NavService.GetMenuTree();
     var activeReportId = ViewData["ActiveReportId"]?.ToString() ?? Context.Request.Query["report"].ToString();
-    var isHome = string.IsNullOrEmpty(activeReportId) && (ViewData["IsHome"] as bool? == true || Context.Request.Path == "/" && !Context.Request.Query.ContainsKey("report"));
+    var isHome = string.IsNullOrEmpty(activeReportId) && !Context.Request.Path.StartsWithSegments("/Admin");
     var isExplore = ViewData["IsExplore"] as bool? == true;
     var isError = ViewData["IsError"] as bool? == true;
     var isAdmin = Context.Request.Path.StartsWithSegments("/Admin") || ViewData["IsAdmin"] as bool? == true;
@@ -41,11 +41,11 @@
     <link rel="stylesheet" href="~/css/portal.css" asp-append-version="true" />
 </head>
 <body>
-    <div class="app-container@(!isHome && !isExplore ? "" : (isHome ? " app-container--home" : ""))">
+    <div class="app-container">
         <!-- =================================================================
              1. LEFT SIDEBAR NAVIGATION (~22% width, exact SOCADEL structure)
              ================================================================= -->
-        <aside class="app-sidebar@(isHome ? " app-sidebar--hidden" : "")">
+        <aside class="app-sidebar">
             <!-- 1.1 SOCADEL Official Logo -->
             <div class="sidebar-header">
                 <a href="/" class="sidebar-logo-link" title="Accueil Portail SOCADEL">
@@ -248,7 +248,7 @@
                 </div>
             </header>
 
-            <!-- 2.2 Sub-Header (Enhanced Breadcrumbs on Left, Green Action Buttons on Right - Point 5) -->
+            <!-- 2.2 Sub-Header (Enhanced Breadcrumbs on Left, Green Action Buttons on Right) -->
             <div class="page-subheader">
                 <nav class="breadcrumb-nav" aria-label="Fil d'Ariane">
                     <a href="/" class="breadcrumb-home-link" title="Accueil">
@@ -263,21 +263,57 @@
                         </svg>
                     </span>
 
-                    @for (int i = 0; i < breadcrumbs.Count; i++)
+                    @{
+                        var breadcrumbNodes = !string.IsNullOrEmpty(activeReportId) ? NavService.GetBreadcrumbNodes(activeReportId) : new List<MenuItem>();
+                    }
+
+                    @if (isAdmin)
                     {
-                        var isLast = i == breadcrumbs.Count - 1;
-                        if (isLast)
+                        <a href="/" class="breadcrumb-item-link">Portail</a>
+                        <span class="breadcrumb-separator">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                        <a href="/Admin" class="breadcrumb-item-link">Console d'Administration</a>
+                        <span class="breadcrumb-separator">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                        <span class="breadcrumb-active" aria-current="page">Arborescence &amp; Rapports</span>
+                    }
+                    else if (isHome || !breadcrumbNodes.Any())
+                    {
+                        <span class="breadcrumb-active" aria-current="page">Accueil</span>
+                    }
+                    else
+                    {
+                        for (int i = 0; i < breadcrumbNodes.Count; i++)
                         {
-                            <span class="breadcrumb-active" aria-current="page">@breadcrumbs[i]</span>
-                        }
-                        else
-                        {
-                            <span class="breadcrumb-item">@breadcrumbs[i]</span>
-                            <span class="breadcrumb-separator">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="9 18 15 12 9 6"></polyline>
-                                </svg>
-                            </span>
+                            var node = breadcrumbNodes[i];
+                            var isLast = i == breadcrumbNodes.Count - 1;
+
+                            if (isLast)
+                            {
+                                <span class="breadcrumb-active" aria-current="page">@node.Title</span>
+                            }
+                            else
+                            {
+                                if (node.Type == ItemType.Report)
+                                {
+                                    <a href="/?report=@node.Id" class="breadcrumb-item-link">@node.Title</a>
+                                }
+                                else
+                                {
+                                    <span class="breadcrumb-item-clickable" onclick="toggleSidebarMenuFromBreadcrumb('@node.Id')">@node.Title</span>
+                                }
+                                <span class="breadcrumb-separator">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </span>
+                            }
                         }
                     }
                 </nav>
@@ -301,7 +337,7 @@
                 </div>
             </div>
 
-            <!-- 2.3 Main Report Workspace Card (Houses View 1, 2, 3, or Admin) -->
+            <!-- 2.3 Main Report Workspace Card -->
             <section class="report-workspace" id="mainReportWorkspace">
                 @RenderBody()
             </section>

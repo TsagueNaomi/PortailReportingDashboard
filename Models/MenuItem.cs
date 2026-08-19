@@ -27,6 +27,7 @@ namespace PortailSocadel.Models
         public ReportEngine Engine { get; set; } = ReportEngine.PowerBI;
         public string? Description { get; set; }
         public string? Code { get; set; }
+        public string? ReportUrl { get; set; }
         public bool SimulateError { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
