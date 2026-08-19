@@ -46,6 +46,61 @@ function initTreeNavigation() {
         let grandParent = activeReport.closest('.tree-level-1-item');
         if (grandParent) grandParent.classList.remove('collapsed');
     }
+
+    // Level 3 Report Links: Smooth iframe update without full page reload & active state transition
+    document.querySelectorAll('.tree-report-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            const reportId = this.getAttribute('data-id');
+            const pbiContainer = document.querySelector('.pbi-report-container');
+
+            if (pbiContainer && reportId) {
+                e.preventDefault();
+
+                // 1. Update Active class in sidebar menu
+                document.querySelectorAll('.tree-report-link').forEach(r => r.classList.remove('active'));
+                this.classList.add('active');
+
+                // 2. Expand parent categories
+                let parentSub = this.closest('.tree-level-2-item');
+                if (parentSub) parentSub.classList.remove('collapsed');
+                let parentCat = this.closest('.tree-level-1-item');
+                if (parentCat) parentCat.classList.remove('collapsed');
+
+                // 3. Update Browser URL smoothly
+                window.history.pushState({ reportId }, '', `/?report=${encodeURIComponent(reportId)}`);
+
+                // 4. Update Header Titles dynamically
+                const reportTitle = this.querySelector('.report-link-text')?.textContent.trim() || 'Rapport décisionnel';
+                const topTitle = document.querySelector('.pbi-report-title-top');
+                if (topTitle) topTitle.textContent = reportTitle;
+
+                const currentBreadcrumb = document.querySelector('.breadcrumb-current-page');
+                if (currentBreadcrumb) currentBreadcrumb.textContent = reportTitle;
+
+                // 5. Update iframe source smoothly
+                let reportUrl = this.getAttribute('data-url');
+                if (!reportUrl || reportUrl === '') {
+                    if (reportId === 'rep-enc-synth') {
+                        reportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9";
+                    } else if (reportId === 'rep-enc-modes') {
+                        reportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9";
+                    }
+                }
+
+                const iframe = document.querySelector('.pbi-iframe-wrapper iframe');
+                if (iframe && reportUrl) {
+                    iframe.style.opacity = '0.3';
+                    iframe.style.transition = 'opacity 0.25s ease';
+                    iframe.src = reportUrl;
+                    setTimeout(() => {
+                        iframe.style.opacity = '1';
+                    }, 300);
+                } else {
+                    window.location.href = `/?report=${encodeURIComponent(reportId)}`;
+                }
+            }
+        });
+    });
 }
 
 /* ==========================================================================
@@ -348,44 +403,118 @@ function initChartInteractions() {
 /* ==========================================================================
    5. Administration Features (Modals & Filtering)
    ========================================================================== */
+let adminCurrentPage = 1;
+let adminPageSize = 10;
+
+function filterAndPaginateAdminTable() {
+    const adminSearch = document.getElementById('adminTableSearch');
+    const adminTypeFilter = document.getElementById('adminTypeFilter');
+    const adminClearBtn = document.getElementById('adminSearchClear');
+
+    const query = adminSearch ? adminSearch.value.toLowerCase().trim() : '';
+    const selectedType = adminTypeFilter ? adminTypeFilter.value : '';
+
+    if (adminClearBtn) {
+        adminClearBtn.style.display = query.length > 0 ? 'inline-flex' : 'none';
+    }
+
+    const allRows = Array.from(document.querySelectorAll('.admin-table tbody tr'));
+    if (allRows.length === 0) return;
+
+    const matchingRows = allRows.filter(row => {
+        const title = (row.getAttribute('data-title') || '').toLowerCase();
+        const level = row.getAttribute('data-level') || '';
+
+        const matchesText = !query || title.includes(query);
+        const matchesType = !selectedType || level === selectedType;
+
+        return matchesText && matchesType;
+    });
+
+    const totalMatching = matchingRows.length;
+    const effectivePageSize = adminPageSize >= 1000 ? (totalMatching || 1) : adminPageSize;
+    const totalPages = Math.ceil(totalMatching / effectivePageSize) || 1;
+
+    if (adminCurrentPage > totalPages) adminCurrentPage = totalPages;
+    if (adminCurrentPage < 1) adminCurrentPage = 1;
+
+    const startIndex = (adminCurrentPage - 1) * effectivePageSize;
+    const endIndex = Math.min(startIndex + effectivePageSize, totalMatching);
+
+    allRows.forEach(row => row.style.display = 'none');
+    matchingRows.slice(startIndex, endIndex).forEach(row => row.style.display = '');
+
+    const startSpan = document.getElementById('paginationStart');
+    const endSpan = document.getElementById('paginationEnd');
+    const totalSpan = document.getElementById('paginationTotal');
+    const navBtns = document.getElementById('paginationNav');
+
+    if (startSpan) startSpan.textContent = totalMatching === 0 ? '0' : (startIndex + 1).toString();
+    if (endSpan) endSpan.textContent = endIndex.toString();
+    if (totalSpan) totalSpan.textContent = totalMatching.toString();
+
+    if (navBtns) {
+        let buttonsHtml = '';
+        buttonsHtml += `<button type="button" class="page-nav-btn ${adminCurrentPage <= 1 ? 'disabled' : ''}" onclick="goToAdminPage(${adminCurrentPage - 1})" ${adminCurrentPage <= 1 ? 'disabled' : ''}>&laquo; Précédent</button>`;
+
+        for (let p = 1; p <= totalPages; p++) {
+            if (p === 1 || p === totalPages || (p >= adminCurrentPage - 2 && p <= adminCurrentPage + 2)) {
+                buttonsHtml += `<button type="button" class="page-num-btn ${p === adminCurrentPage ? 'active' : ''}" onclick="goToAdminPage(${p})">${p}</button>`;
+            } else if (p === adminCurrentPage - 3 || p === adminCurrentPage + 3) {
+                buttonsHtml += `<span class="page-ellipsis">&hellip;</span>`;
+            }
+        }
+
+        buttonsHtml += `<button type="button" class="page-nav-btn ${adminCurrentPage >= totalPages ? 'disabled' : ''}" onclick="goToAdminPage(${adminCurrentPage + 1})" ${adminCurrentPage >= totalPages ? 'disabled' : ''}>Suivant &raquo;</button>`;
+
+        navBtns.innerHTML = buttonsHtml;
+    }
+}
+
+window.goToAdminPage = function(page) {
+    adminCurrentPage = page;
+    filterAndPaginateAdminTable();
+};
+
+window.changePageSize = function(size) {
+    adminPageSize = parseInt(size, 10) || 10;
+    adminCurrentPage = 1;
+    filterAndPaginateAdminTable();
+};
+
 function initAdminFeatures() {
     const adminSearch = document.getElementById('adminTableSearch');
     const adminTypeFilter = document.getElementById('adminTypeFilter');
-    const adminStatusFilter = document.getElementById('adminStatusFilter');
+    const adminClearBtn = document.getElementById('adminSearchClear');
+    const pageSizeSelect = document.getElementById('pageSizeSelect');
 
-    function filterAdminTable() {
-        if (!adminSearch && !adminTypeFilter && !adminStatusFilter) return;
-        const query = adminSearch ? adminSearch.value.toLowerCase().trim() : '';
-        const selectedType = adminTypeFilter ? adminTypeFilter.value : '';
-        const selectedStatus = adminStatusFilter ? adminStatusFilter.value : '';
-
-        const rows = document.querySelectorAll('.admin-table tbody tr');
-        rows.forEach(row => {
-            const title = (row.getAttribute('data-title') || '').toLowerCase();
-            const level = row.getAttribute('data-level') || '';
-            const status = row.getAttribute('data-status') || '';
-
-            const matchesText = !query || title.includes(query);
-            const matchesType = !selectedType || level === selectedType;
-            const matchesStatus = !selectedStatus || status === selectedStatus;
-
-            if (matchesText && matchesType && matchesStatus) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
+    if (adminSearch) {
+        adminSearch.addEventListener('input', function() {
+            adminCurrentPage = 1;
+            filterAndPaginateAdminTable();
+        });
+    }
+    if (adminTypeFilter) {
+        adminTypeFilter.addEventListener('change', function() {
+            adminCurrentPage = 1;
+            filterAndPaginateAdminTable();
+        });
+    }
+    if (adminClearBtn) {
+        adminClearBtn.addEventListener('click', function() {
+            if (adminSearch) adminSearch.value = '';
+            adminCurrentPage = 1;
+            filterAndPaginateAdminTable();
+            if (adminSearch) adminSearch.focus();
+        });
+    }
+    if (pageSizeSelect) {
+        pageSizeSelect.addEventListener('change', function() {
+            window.changePageSize(this.value);
         });
     }
 
-    if (adminSearch) {
-        adminSearch.addEventListener('input', filterAdminTable);
-    }
-    if (adminTypeFilter) {
-        adminTypeFilter.addEventListener('change', filterAdminTable);
-    }
-    if (adminStatusFilter) {
-        adminStatusFilter.addEventListener('change', filterAdminTable);
-    }
+    filterAndPaginateAdminTable();
 }
 
 // Global modal helper functions for Admin
@@ -418,3 +547,39 @@ window.openAddChildModal = function (parentId, parentLevel) {
 
     window.openAdminModal('modalAddItem');
 };
+
+/* ==========================================================================
+   6. Clickable Breadcrumb Navigation Handler
+   ========================================================================== */
+window.handleBreadcrumbClick = function (e, nodeId) {
+    if (e) e.preventDefault();
+    if (!nodeId) return;
+
+    const targetElement = document.querySelector(`[data-id="${nodeId}"]`);
+    if (targetElement) {
+        // Expand ancestor level 1 and level 2 items
+        let parentL2 = targetElement.closest('.tree-level-2-item');
+        if (parentL2) parentL2.classList.remove('collapsed');
+
+        let parentL1 = targetElement.closest('.tree-level-1-item');
+        if (parentL1) parentL1.classList.remove('collapsed');
+
+        if (targetElement.classList.contains('collapsed')) {
+            targetElement.classList.remove('collapsed');
+        }
+
+        // Find first available report link in this subtree
+        const firstReport = targetElement.querySelector('.tree-report-link');
+        if (firstReport) {
+            const reportUrl = firstReport.getAttribute('href');
+            if (reportUrl) {
+                window.location.href = reportUrl;
+                return;
+            }
+        }
+
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+};
+
+window.toggleSidebarMenuFromBreadcrumb = window.handleBreadcrumbClick;

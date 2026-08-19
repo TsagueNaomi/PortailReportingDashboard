@@ -136,6 +136,7 @@
                                                                class="tree-report-link @(isActive ? "active" : "")" 
                                                                data-id="@report.Id"
                                                                data-title="@report.Title - @sub.Title"
+                                                               data-url="@(report.ReportUrl ?? "")"
                                                                title="@report.Description">
                                                                 <span class="tree-report-icon">
                                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -269,23 +270,23 @@
 
                     @if (isAdmin)
                     {
-                        <a href="/" class="breadcrumb-item-link">Portail</a>
+                        <a href="/" class="breadcrumb-item-link" title="Retourner à l'accueil du portail">Portail</a>
                         <span class="breadcrumb-separator">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="9 18 15 12 9 6"></polyline>
                             </svg>
                         </span>
-                        <a href="/Admin" class="breadcrumb-item-link">Console d'Administration</a>
+                        <a href="/Admin" class="breadcrumb-item-link" title="Console d'Administration">Console d'Administration</a>
                         <span class="breadcrumb-separator">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="9 18 15 12 9 6"></polyline>
                             </svg>
                         </span>
-                        <span class="breadcrumb-active" aria-current="page">Arborescence &amp; Rapports</span>
+                        <span class="breadcrumb-item-link breadcrumb-current-page" aria-current="page">Arborescence &amp; Rapports</span>
                     }
                     else if (isHome || !breadcrumbNodes.Any())
                     {
-                        <span class="breadcrumb-active" aria-current="page">Accueil</span>
+                        <a href="/" class="breadcrumb-item-link breadcrumb-current-page" aria-current="page">Accueil</a>
                     }
                     else
                     {
@@ -294,20 +295,17 @@
                             var node = breadcrumbNodes[i];
                             var isLast = i == breadcrumbNodes.Count - 1;
 
-                            if (isLast)
+                            if (node.Type == ItemType.Report)
                             {
-                                <span class="breadcrumb-active" aria-current="page">@node.Title</span>
+                                <a href="/?report=@node.Id" class="breadcrumb-item-link @(isLast ? "breadcrumb-current-page" : "")" title="Accéder au rapport @node.Title">@node.Title</a>
                             }
                             else
                             {
-                                if (node.Type == ItemType.Report)
-                                {
-                                    <a href="/?report=@node.Id" class="breadcrumb-item-link">@node.Title</a>
-                                }
-                                else
-                                {
-                                    <span class="breadcrumb-item-clickable" onclick="toggleSidebarMenuFromBreadcrumb('@node.Id')">@node.Title</span>
-                                }
+                                <a href="#" class="breadcrumb-item-link breadcrumb-item-clickable" onclick="handleBreadcrumbClick(event, '@node.Id')" title="Ouvrir la section @node.Title dans le menu">@node.Title</a>
+                            }
+
+                            if (!isLast)
+                            {
                                 <span class="breadcrumb-separator">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="9 18 15 12 9 6"></polyline>

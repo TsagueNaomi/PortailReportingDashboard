@@ -45,11 +45,12 @@
 
                     <a href="/?report=@report.Id" class="report-card" title="@report.Title">
                         <!-- Location Badge for Non-Technical Users -->
-                        <div class="report-card-location-badge">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <div class="report-card-location-badge" title="Emplacement du rapport dans l'arborescence">
+                            <span class="location-label">Emplacement :</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="location-icon">
                                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                             </svg>
-                            <span>@categoryLabel &rsaquo; @subcategoryLabel</span>
+                            <span class="location-path"><strong>@categoryLabel</strong> &rsaquo; <strong>@subcategoryLabel</strong></span>
                         </div>
 
                         <div class="report-card-header-row">

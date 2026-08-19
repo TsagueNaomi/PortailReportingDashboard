@@ -14,6 +14,11 @@ namespace PortailSocadel.Pages.Admin
             _navService = navService;
         }
 
+        [BindProperty(SupportsGet = true)]
+        public string View { get; set; } = "datatable";
+
+        public bool IsStatsView => string.Equals(View, "stats", StringComparison.OrdinalIgnoreCase);
+
         public List<MenuItem> TreeItems { get; set; } = new();
         public List<MenuItem> FlatItems { get; set; } = new();
         public List<MenuItem> CategoryOptions { get; set; } = new();

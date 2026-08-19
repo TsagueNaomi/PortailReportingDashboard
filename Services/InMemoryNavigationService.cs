@@ -55,6 +55,7 @@ namespace PortailSocadel.Services
                     Order = 1, 
                     Engine = ReportEngine.PowerBI, 
                     Code = "REP-ENC-01",
+                    ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
                     Description = "Suivi quotidien des flux de caisse, dépôts bancaires et ventilations par agence" 
                 });
                 _items.Add(new MenuItem 
@@ -66,6 +67,7 @@ namespace PortailSocadel.Services
                     Order = 2, 
                     Engine = ReportEngine.PowerBI, 
                     Code = "REP-ENC-02",
+                    ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
                     Description = "Analyse des règlements par espèces, virements, cartes et mobile money" 
                 });
 

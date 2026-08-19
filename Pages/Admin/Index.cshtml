@@ -17,10 +17,34 @@
                 </svg>
                 <span>SOCADEL Back-Office &bull; Gestion du Portail Décisionnel</span>
             </div>
-            <h2>Console d'Administration de l'Arborescence & des Rapports</h2>
-            <p>Gestion CRUD complète du menu latéral et des liens de rapports décisionnels Power BI</p>
+            <h2>Console d'Administration de l'Arborescence &amp; des Rapports</h2>
+            <p>Gestion des menus, sous-menus et liens de rapports décisionnels Power BI</p>
         </div>
         <div class="admin-header-actions">
+            @if (Model.IsStatsView)
+            {
+                <a href="/Admin" class="btn-admin-view-toggle active" title="Accéder à la vue tableau de données Datatable">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                        <line x1="3" y1="15" x2="21" y2="15"></line>
+                        <line x1="9" y1="3" x2="9" y2="21"></line>
+                    </svg>
+                    <span>Datatable d'Administration</span>
+                </a>
+            }
+            else
+            {
+                <a href="/Admin?view=stats" class="btn-admin-view-toggle" title="Voir la vue statistiques avec les 3 cartes">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    <span>📊 Statistiques &amp; Métriques (3 Cartes)</span>
+                </a>
+            }
+
             <form method="post" asp-page-handler="Reset" style="display:inline;" onsubmit="return confirm('Attention : Êtes-vous sûr de vouloir réinitialiser l\'ensemble de l\'arborescence aux données par défaut de SOCADEL ?');">
                 <button type="submit" class="btn-admin-reset" title="Réinitialiser l'arborescence par défaut">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -29,7 +53,7 @@
                         <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
                         <path d="M8 16H3v5"></path>
                     </svg>
-                    <span>Réinitialiser par défaut</span>
+                    <span>Réinitialiser</span>
                 </button>
             </form>
         </div>
@@ -63,367 +87,317 @@
         </div>
     }
 
-    <!-- Stat KPI Cards Grid (Structure exacte demandée) -->
-    <div class="admin-stats-grid">
-        <div class="admin-stat-card card-blue">
-            <div class="admin-stat-top">
-                <div class="admin-stat-info">
-                    <span class="admin-stat-label">Nouveau Menu</span>
-                    <span class="admin-stat-val">@Model.TotalCategories</span>
+    @if (Model.IsStatsView)
+    {
+        <!-- Stat KPI Cards Page View -->
+        <div class="admin-stats-page-wrapper">
+            <div class="admin-stats-header-bar">
+                <h3>Tableau des Statistiques d'Arborescence</h3>
+                <a href="/Admin" class="btn-admin-back-link">&larr; Retour à la Console Datatable</a>
+            </div>
+            <div class="admin-stats-grid">
+                <div class="admin-stat-card card-blue">
+                    <div class="admin-stat-top">
+                        <div class="admin-stat-info">
+                            <span class="admin-stat-label">Menus Principaux</span>
+                            <span class="admin-stat-val">@Model.TotalCategories</span>
+                        </div>
+                        <div class="admin-stat-icon-wrapper icon-blue">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="admin-stat-footer">
+                        <span class="stat-badge">Menu Principal &bull; Racine</span>
+                        <button type="button" class="btn-card-quick-add" onclick="openAddModalWithLevel('1')">+ Ajouter Menu</button>
+                    </div>
                 </div>
-                <div class="admin-stat-icon-wrapper icon-blue">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                    </svg>
+
+                <div class="admin-stat-card card-green">
+                    <div class="admin-stat-top">
+                        <div class="admin-stat-info">
+                            <span class="admin-stat-label">Sous-menus</span>
+                            <span class="admin-stat-val">@Model.TotalSubCategories</span>
+                        </div>
+                        <div class="admin-stat-icon-wrapper icon-green">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                <line x1="12" y1="11" x2="12" y2="17"></line>
+                                <line x1="9" y1="14" x2="15" y2="14"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="admin-stat-footer">
+                        <span class="stat-badge">Sous-menu &bull; Catégorie</span>
+                        <button type="button" class="btn-card-quick-add" onclick="openAddModalWithLevel('2')">+ Ajouter Sous-menu</button>
+                    </div>
+                </div>
+
+                <div class="admin-stat-card card-purple">
+                    <div class="admin-stat-top">
+                        <div class="admin-stat-info">
+                            <span class="admin-stat-label">Rapports Intégrés</span>
+                            <span class="admin-stat-val">@Model.TotalReports</span>
+                        </div>
+                        <div class="admin-stat-icon-wrapper icon-purple">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="3" y1="9" x2="21" y2="9"></line>
+                                <line x1="9" y1="21" x2="9" y2="9"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="admin-stat-footer">
+                        <span class="stat-badge">Rapport &bull; Power BI / SSRS</span>
+                        <button type="button" class="btn-card-quick-add" onclick="openAddModalWithLevel('3')">+ Ajouter Rapport</button>
+                    </div>
                 </div>
             </div>
-            <div class="admin-stat-footer">
-                <span class="stat-badge">Niveau 1 &bull; Racine</span>
-                <button type="button" class="btn-card-quick-add" onclick="openAddModalWithLevel('1')">+ Ajouter</button>
+        </div>
+    }
+    else
+    {
+        <!-- Search Filter Bar Placed Above Datatable -->
+        <div class="admin-filter-bar">
+            <div class="admin-search-wrapper">
+                <svg class="admin-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="adminTableSearch" class="admin-filter-input" placeholder="Rechercher par intitulé, code, lien ou parent..." />
+                <button type="button" id="adminSearchClear" class="admin-search-clear-btn" title="Effacer la recherche" style="display:none;">&times;</button>
+            </div>
+
+            <div class="admin-filter-controls">
+                <div class="admin-filter-group">
+                    <label for="adminTypeFilter">Type d'élément :</label>
+                    <select id="adminTypeFilter" class="admin-filter-select">
+                        <option value="">Tous les types</option>
+                        <option value="1">Menu principal</option>
+                        <option value="2">Sous-menu</option>
+                        <option value="3">Rapport</option>
+                    </select>
+                </div>
+
+                <div class="admin-quick-add-group">
+                    <button type="button" class="btn-admin-add-level level-1" onclick="openAddModalWithLevel('1')" title="Ajouter un Menu principal">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>+ Menu</span>
+                    </button>
+                    <button type="button" class="btn-admin-add-level level-2" onclick="openAddModalWithLevel('2')" title="Ajouter un Sous-menu">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>+ Sous-menu</span>
+                    </button>
+                    <button type="button" class="btn-admin-primary-add" onclick="openAddModalWithLevel('3')" title="Ajouter un Rapport">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>+ Nouveau Rapport</span>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div class="admin-stat-card card-green">
-            <div class="admin-stat-top">
-                <div class="admin-stat-info">
-                    <span class="admin-stat-label">Nouveau Sous-menu</span>
-                    <span class="admin-stat-val">@Model.TotalSubCategories</span>
-                </div>
-                <div class="admin-stat-icon-wrapper icon-green">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                        <line x1="12" y1="11" x2="12" y2="17"></line>
-                        <line x1="9" y1="14" x2="15" y2="14"></line>
-                    </svg>
-                </div>
-            </div>
-            <div class="admin-stat-footer">
-                <span class="stat-badge">Niveau 2 &bull; Catégorie</span>
-                <button type="button" class="btn-card-quick-add" onclick="openAddModalWithLevel('2')">+ Ajouter</button>
-            </div>
-        </div>
-
-        <div class="admin-stat-card card-purple">
-            <div class="admin-stat-top">
-                <div class="admin-stat-info">
-                    <span class="admin-stat-label">Nouveau Rapport</span>
-                    <span class="admin-stat-val">@Model.TotalReports</span>
-                </div>
-                <div class="admin-stat-icon-wrapper icon-purple">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="3" y1="9" x2="21" y2="9"></line>
-                        <line x1="9" y1="21" x2="9" y2="9"></line>
-                    </svg>
-                </div>
-            </div>
-            <div class="admin-stat-footer">
-                <span class="stat-badge">Niveau 3 &bull; Power BI / SSRS</span>
-                <button type="button" class="btn-card-quick-add" onclick="openAddModalWithLevel('3')">+ Ajouter</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filter & Toolbar Bar -->
-    <div class="admin-filter-bar">
-        <div class="admin-search-wrapper">
-            <svg class="admin-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" id="adminTableSearch" class="admin-filter-input" placeholder="Rechercher par intitulé, code, lien ou parent..." />
-            <button type="button" id="adminSearchClear" class="admin-search-clear-btn" title="Effacer la recherche" style="display:none;">&times;</button>
-        </div>
-
-        <div class="admin-filter-controls">
-            <div class="admin-filter-group">
-                <label for="adminTypeFilter">Niveau :</label>
-                <select id="adminTypeFilter" class="admin-filter-select">
-                    <option value="">Tous les niveaux (1, 2, 3)</option>
-                    <option value="1">Niveau 1 — Nouveau Menu</option>
-                    <option value="2">Niveau 2 — Nouveau Sous-menu</option>
-                    <option value="3">Niveau 3 — Nouveau Rapport</option>
-                </select>
-            </div>
-
-            <div class="admin-filter-group">
-                <label for="adminStatusFilter">Statut :</label>
-                <select id="adminStatusFilter" class="admin-filter-select">
-                    <option value="">Tous les statuts</option>
-                    <option value="active">Actif</option>
-                    <option value="inactive">Inactif</option>
-                    <option value="error">Simulation Erreur</option>
-                </select>
-            </div>
-
-            <div class="admin-add-dropdown-container">
-                <button type="button" class="btn-admin-primary-add" onclick="openAddModalWithLevel('3')">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    <span>Nouveau Rapport</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Data Table representing the full CRUD Hierarchy -->
-    <div class="admin-table-container">
-        <table class="admin-table" id="adminHierarchyTable">
-            <thead>
-                <tr>
-                    <th style="width: 28%;">Structure & Intitulé</th>
-                    <th style="width: 13%;">Niveau / Type</th>
-                    <th style="width: 15%;">Parent Hiérarchique</th>
-                    <th style="width: 22%;">Lien du rapport / Code</th>
-                    <th style="width: 6%; text-align: center;">Ordre</th>
-                    <th style="width: 8%; text-align: center;">Statut</th>
-                    <th style="width: 8%; text-align: right;">Actions CRUD</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var cat in Model.TreeItems)
-                {
-                    <tr data-title="@cat.Title @cat.Description @cat.Code" data-level="1" data-status="@(cat.IsActive ? "active" : "inactive")">
-                        <td>
-                            <div class="tree-node-cell level-indent-0">
-                                <span class="table-node-icon cat-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                    </svg>
-                                </span>
-                                <div class="node-text-group">
-                                    <strong class="node-title">@cat.Title</strong>
-                                    @if (!string.IsNullOrEmpty(cat.Description))
-                                    {
-                                        <span class="node-description">@cat.Description</span>
-                                    }
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge badge-level-1">Niveau 1 &bull; Menu</span></td>
-                        <td><span class="text-muted-dash">&mdash; (Racine)</span></td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(cat.Code))
-                            {
-                                <span class="badge-code">@cat.Code</span>
-                            }
-                            else
-                            {
-                                <span class="text-muted-dash">&mdash;</span>
-                            }
-                        </td>
-                        <td style="text-align: center; font-weight: 600;">@cat.Order</td>
-                        <td style="text-align: center;">
-                            <span class="badge @(cat.IsActive ? "badge-active" : "badge-inactive")">
-                                @(cat.IsActive ? "Actif" : "Inactif")
-                            </span>
-                        </td>
-                        <td style="text-align: right; white-space: nowrap;">
-                            <div class="table-action-btns">
-                                <button type="button" class="btn-table-action btn-table-add" onclick="openAddChildModal('@cat.Id', '1')" title="Ajouter un sous-menu sous ce menu">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                                    </svg>
-                                    <span>+ Sous-menu</span>
-                                </button>
-                                <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@cat.Id', '@cat.Title', '', '1', '@(cat.Description ?? "")', '@(cat.ReportUrl ?? "")')" title="Modifier ce menu">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                    </svg>
-                                    <span>Modifier</span>
-                                </button>
-                                <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le menu « @cat.Title » et tous ses sous-menus et rapports associés ?');">
-                                    <input type="hidden" name="id" value="@cat.Id" />
-                                    <button type="submit" class="btn-table-action btn-table-delete" title="Supprimer ce menu">
-                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="3 6 5 6 21 6"></polyline>
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                        </svg>
-                                        <span>Supprimer</span>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
+        <!-- High Clarity Datatable reproducing exemple_databale.jpg style -->
+        <div class="admin-table-container">
+            <table class="admin-table exemple-datatable-grid" id="adminHierarchyTable">
+                <thead>
+                    <tr>
+                        <th style="width: 13%;">Type / Structure</th>
+                        <th style="width: 29%;">Intitulé &amp; Code</th>
+                        <th style="width: 16%;">Parent Hiérarchique</th>
+                        <th style="width: 26%;">Lien / URL du Rapport</th>
+                        <th style="width: 16%; text-align: center;">Actions</th>
                     </tr>
-
-                    @foreach (var sub in cat.Children)
+                </thead>
+                <tbody>
+                    @foreach (var cat in Model.TreeItems)
                     {
-                        <tr data-title="@sub.Title @sub.Description @sub.Code @cat.Title" data-level="2" data-status="@(sub.IsActive ? "active" : "inactive")">
+                        <tr data-title="@cat.Title @cat.Description @cat.Code" data-level="1">
                             <td>
-                                <div class="tree-node-cell level-indent-1">
-                                    <span class="table-node-icon sub-icon">
+                                <span class="badge badge-level-1">Menu Principal</span>
+                            </td>
+                            <td>
+                                <div class="tree-node-cell">
+                                    <span class="table-node-icon cat-icon">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                            <line x1="12" y1="11" x2="12" y2="17"></line>
-                                            <line x1="9" y1="14" x2="15" y2="14"></line>
                                         </svg>
                                     </span>
                                     <div class="node-text-group">
-                                        <strong class="node-title">@sub.Title</strong>
-                                        @if (!string.IsNullOrEmpty(sub.Description))
+                                        <strong class="node-title">@cat.Title</strong>
+                                        @if (!string.IsNullOrEmpty(cat.Code))
                                         {
-                                            <span class="node-description">@sub.Description</span>
+                                            <span class="badge-code">@cat.Code</span>
                                         }
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="badge badge-level-2">Niveau 2 &bull; Sous-menu</span></td>
-                            <td>
-                                <span class="parent-reference blue">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                    </svg>
-                                    @cat.Title
-                                </span>
-                            </td>
-                            <td>
-                                @if (!string.IsNullOrEmpty(sub.Code))
-                                {
-                                    <span class="badge-code">@sub.Code</span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted-dash">&mdash;</span>
-                                }
-                            </td>
-                            <td style="text-align: center; font-weight: 600;">@sub.Order</td>
-                            <td style="text-align: center;">
-                                <span class="badge @(sub.IsActive ? "badge-active" : "badge-inactive")">
-                                    @(sub.IsActive ? "Actif" : "Inactif")
-                                </span>
-                            </td>
-                            <td style="text-align: right; white-space: nowrap;">
-                                <div class="table-action-btns">
-                                    <button type="button" class="btn-table-action btn-table-add" onclick="openAddChildModal('@sub.Id', '2')" title="Ajouter un rapport sous ce sous-menu">
-                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                                        </svg>
-                                        <span>+ Rapport</span>
+                            <td><span class="text-muted-dash">&mdash; (Racine)</span></td>
+                            <td><span class="text-muted-dash">&mdash;</span></td>
+                            <td style="text-align: center; white-space: nowrap;">
+                                <div class="table-action-btns-grid">
+                                    <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@cat.Id', '@cat.Title', '', '1', '@(cat.Description ?? "")', '@(cat.ReportUrl ?? "")')" title="Modifier ce menu">
+                                        Modifier
                                     </button>
-                                    <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@sub.Id', '@sub.Title', '@cat.Id', '2', '@(sub.Description ?? "")', '@(sub.ReportUrl ?? "")')" title="Modifier ce sous-menu">
-                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                        </svg>
-                                        <span>Modifier</span>
-                                    </button>
-                                    <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le sous-menu « @sub.Title » et tous ses rapports ?');">
-                                        <input type="hidden" name="id" value="@sub.Id" />
-                                        <button type="submit" class="btn-table-action btn-table-delete" title="Supprimer ce sous-menu">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            </svg>
-                                            <span>Supprimer</span>
+                                    <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le menu « @cat.Title » et tous ses sous-menus et rapports associés ?');">
+                                        <input type="hidden" name="id" value="@cat.Id" />
+                                        <button type="submit" class="btn-grid-action btn-grid-delete" title="Supprimer ce menu">
+                                            Supprimer
                                         </button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
 
-                        @foreach (var report in sub.Children)
+                        @foreach (var sub in cat.Children)
                         {
-                            var statusValue = report.SimulateError ? "error" : (report.IsActive ? "active" : "inactive");
-                            <tr data-title="@report.Title @report.Description @report.ReportUrl @report.Code @sub.Title @cat.Title" data-level="3" data-status="@statusValue">
+                            <tr data-title="@sub.Title @sub.Description @sub.Code @cat.Title" data-level="2">
                                 <td>
-                                    <div class="tree-node-cell level-indent-2">
-                                        <span class="table-node-icon report-icon">
+                                    <span class="badge badge-level-2">Sous-menu</span>
+                                </td>
+                                <td>
+                                    <div class="tree-node-cell level-indent-1">
+                                        <span class="table-node-icon sub-icon">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                                <line x1="3" y1="9" x2="21" y2="9"></line>
-                                                <line x1="9" y1="21" x2="9" y2="9"></line>
+                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                                <line x1="12" y1="11" x2="12" y2="17"></line>
+                                                <line x1="9" y1="14" x2="15" y2="14"></line>
                                             </svg>
                                         </span>
                                         <div class="node-text-group">
-                                            <a href="/?report=@report.Id" class="node-report-link" title="Consulter le rapport dans le portail">
-                                                @report.Title
-                                            </a>
+                                            <strong class="node-title">@sub.Title</strong>
+                                            @if (!string.IsNullOrEmpty(sub.Code))
+                                            {
+                                                <span class="badge-code">@sub.Code</span>
+                                            }
                                         </div>
                                     </div>
                                 </td>
-                                <td><span class="badge badge-level-3">Niveau 3 &bull; Rapport</span></td>
                                 <td>
-                                    <span class="parent-reference green">
+                                    <span class="parent-reference blue">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                                         </svg>
-                                        @sub.Title
+                                        @cat.Title
                                     </span>
                                 </td>
-                                <td>
-                                    <div class="report-url-cell">
-                                        @if (!string.IsNullOrEmpty(report.ReportUrl))
-                                        {
-                                            <a href="@report.ReportUrl" target="_blank" rel="noopener noreferrer" class="report-url-link" title="@report.ReportUrl">
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                                    <polyline points="15 3 21 3 21 9"></polyline>
-                                                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                                                </svg>
-                                                <span class="report-url-text">@report.ReportUrl</span>
-                                            </a>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted-dash">https://app.powerbi.com/view?r=socadel...</span>
-                                        }
-                                    </div>
-                                </td>
-                                <td style="text-align: center; font-weight: 600;">@report.Order</td>
-                                <td style="text-align: center;">
-                                    @if (report.SimulateError)
-                                    {
-                                        <span class="badge badge-simulated-error" title="Ce rapport déclenche volontairement l'état d'erreur">
-                                            Erreur
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge @(report.IsActive ? "badge-active" : "badge-inactive")">
-                                            @(report.IsActive ? "Actif" : "Inactif")
-                                        </span>
-                                    }
-                                </td>
-                                <td style="text-align: right; white-space: nowrap;">
-                                    <div class="table-action-btns">
-                                        <a href="/?report=@report.Id" class="btn-table-action btn-table-view" title="Tester la visualisation dans le portail">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                                <circle cx="12" cy="12" r="3"></circle>
-                                            </svg>
-                                            <span>Ouvrir</span>
-                                        </a>
-                                        <button type="button" class="btn-table-action btn-table-edit" onclick="openEditModal('@report.Id', '@report.Title', '@sub.Id', '3', '@(report.Description ?? "")', '@(report.ReportUrl ?? "")')" title="Modifier ce rapport">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                            </svg>
-                                            <span>Modifier</span>
+                                <td><span class="text-muted-dash">&mdash;</span></td>
+                                <td style="text-align: center; white-space: nowrap;">
+                                    <div class="table-action-btns-grid">
+                                        <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@sub.Id', '@sub.Title', '@cat.Id', '2', '@(sub.Description ?? "")', '@(sub.ReportUrl ?? "")')" title="Modifier ce sous-menu">
+                                            Modifier
                                         </button>
-                                        <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le rapport « @report.Title » ?');">
-                                            <input type="hidden" name="id" value="@report.Id" />
-                                            <button type="submit" class="btn-table-action btn-table-delete" title="Supprimer ce rapport">
-                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                                </svg>
-                                                <span>Supprimer</span>
+                                        <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le sous-menu « @sub.Title » et tous ses rapports ?');">
+                                            <input type="hidden" name="id" value="@sub.Id" />
+                                            <button type="submit" class="btn-grid-action btn-grid-delete" title="Supprimer ce sous-menu">
+                                                Supprimer
                                             </button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
+
+                            @foreach (var report in sub.Children)
+                            {
+                                <tr data-title="@report.Title @report.Description @report.ReportUrl @report.Code @sub.Title @cat.Title" data-level="3">
+                                    <td>
+                                        <span class="badge badge-level-3">Rapport</span>
+                                    </td>
+                                    <td>
+                                        <div class="tree-node-cell level-indent-2">
+                                            <span class="table-node-icon report-icon">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                                                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                                                </svg>
+                                            </span>
+                                            <div class="node-text-group">
+                                                <a href="/?report=@report.Id" class="node-report-link" title="Consulter le rapport dans le portail">
+                                                    @report.Title
+                                                </a>
+                                                @if (!string.IsNullOrEmpty(report.Code))
+                                                {
+                                                    <span class="badge-code">@report.Code</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="parent-reference green">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                            </svg>
+                                            @sub.Title
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="report-url-cell">
+                                            @if (!string.IsNullOrEmpty(report.ReportUrl))
+                                            {
+                                                <a href="@report.ReportUrl" target="_blank" rel="noopener noreferrer" class="report-url-link" title="@report.ReportUrl">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                                    </svg>
+                                                    <span class="report-url-text">@report.ReportUrl</span>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted-dash">https://app.powerbi.com/view?r=socadel...</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; white-space: nowrap;">
+                                        <div class="table-action-btns-grid">
+                                            <a href="/?report=@report.Id" class="btn-grid-action btn-grid-read" title="Consulter le rapport dans le portail">
+                                                Ouvrir
+                                            </a>
+                                            <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@report.Id', '@report.Title', '@sub.Id', '3', '@(report.Description ?? "")', '@(report.ReportUrl ?? "")')" title="Modifier ce rapport">
+                                                Modifier
+                                            </button>
+                                            <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le rapport « @report.Title » ?');">
+                                                <input type="hidden" name="id" value="@report.Id" />
+                                                <button type="submit" class="btn-grid-action btn-grid-delete" title="Supprimer ce rapport">
+                                                    Supprimer
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
                         }
                     }
-                }
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+
+            <!-- Integrated Datatable Pagination Footer -->
+            <div class="admin-table-pagination-footer">
+                <div class="pagination-info">
+                    Affichage de <strong id="paginationStart">1</strong> à <strong id="paginationEnd">10</strong> sur <strong id="paginationTotal">0</strong> éléments
+                </div>
+                <div class="pagination-controls-wrapper">
+                    <div class="pagination-size-selector">
+                        <label for="pageSizeSelect">Afficher :</label>
+                        <select id="pageSizeSelect" class="admin-filter-select">
+                            <option value="10" selected>10 par page</option>
+                            <option value="25">25 par page</option>
+                            <option value="50">50 par page</option>
+                            <option value="1000">Tous les éléments</option>
+                        </select>
+                    </div>
+                    <div class="pagination-nav-btns" id="paginationNav">
+                        <!-- Rendered by portal.js -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 <!-- =========================================================================
@@ -448,7 +422,7 @@
                 <div class="form-group" id="addGroupParent">
                     <label class="form-label" for="addItemParentId">Élément parent *</label>
                     <select id="addItemParentId" name="ItemInput.ParentId" class="form-control">
-                        <optgroup label="-- Sous-menus disponibles (pour les Rapports Niv. 3) --" id="optgroupSubCategories">
+                        <optgroup label="-- Sous-menus disponibles (pour les Rapports) --" id="optgroupSubCategories">
                             @foreach (var sub in Model.SubCategoryOptions)
                             {
                                 var parentCat = Model.CategoryOptions.FirstOrDefault(c => c.Id == sub.ParentId);
@@ -456,7 +430,7 @@
                                 <option value="@sub.Id">@label</option>
                             }
                         </optgroup>
-                        <optgroup label="-- Menus de niveau 1 (pour les Sous-Menus Niv. 2) --" id="optgroupCategories">
+                        <optgroup label="-- Menus principaux (pour les Sous-Menus) --" id="optgroupCategories">
                             @foreach (var cat in Model.CategoryOptions)
                             {
                                 <option value="@cat.Id">@cat.Title</option>
@@ -470,7 +444,6 @@
                     <input type="text" id="addItemTitle" name="ItemInput.Title" class="form-control" placeholder="Ex: Direction Technique, Maintenance, Rapport Power BI..." required />
                 </div>
 
-                <!-- Remplacement de Description / Note métier par Lien du rapport pour les rapports -->
                 <div class="form-group" id="addGroupReportUrl">
                     <label class="form-label" for="addItemReportUrl">Lien du rapport (Power BI / SSRS / Web) *</label>
                     <input type="url" id="addItemReportUrl" name="ItemInput.ReportUrl" class="form-control" placeholder="https://app.powerbi.com/view?r=eyJrIjoi..." />
@@ -491,7 +464,7 @@
 </div>
 
 <!-- =========================================================================
-     MODAL: MODIFIER UN ÉLÉMENT (Niveau 1, 2 ou 3)
+     MODAL: MODIFIER UN ÉLÉMENT
      ========================================================================= -->
 <div class="modal-overlay" id="modalEditItem">
     <div class="modal-dialog">
@@ -513,13 +486,13 @@
                     <label class="form-label" for="editItemParentId">Élément parent</label>
                     <select id="editItemParentId" name="ItemInput.ParentId" class="form-control">
                         <option value="">-- Aucun parent (Racine) --</option>
-                        <optgroup label="Menus (Niveau 1)" id="editOptgroupCat">
+                        <optgroup label="Menus Principaux" id="editOptgroupCat">
                             @foreach (var cat in Model.CategoryOptions)
                             {
                                 <option value="@cat.Id">@cat.Title</option>
                             }
                         </optgroup>
-                        <optgroup label="Sous-Menus (Niveau 2)" id="editOptgroupSub">
+                        <optgroup label="Sous-Menus" id="editOptgroupSub">
                             @foreach (var sub in Model.SubCategoryOptions)
                             {
                                 var parentCat = Model.CategoryOptions.FirstOrDefault(c => c.Id == sub.ParentId);
@@ -535,7 +508,6 @@
                     <input type="text" id="editItemTitle" name="ItemInput.Title" class="form-control" required />
                 </div>
 
-                <!-- Remplacement de Description par Lien du rapport pour les rapports en édition -->
                 <div class="form-group" id="editGroupReportUrl">
                     <label class="form-label" for="editItemReportUrl">Lien du rapport (Microsoft Power BI) *</label>
                     <input type="url" id="editItemReportUrl" name="ItemInput.ReportUrl" class="form-control" placeholder="https://app.powerbi.com/view?r=..." />
@@ -566,29 +538,31 @@
             const descGroup = document.getElementById('addGroupDescription');
             const modalTitle = document.getElementById('addModalTitle');
 
+            if (!typeInput) return;
+
             if (typeInput.value === '1') {
-                if (modalTitle) modalTitle.textContent = "Ajouter un Nouveau Menu (Niveau 1)";
-                parentGroup.style.display = 'none';
-                reportUrlGroup.style.display = 'none';
-                descGroup.style.display = 'block';
+                if (modalTitle) modalTitle.textContent = "Ajouter un Menu Principal";
+                if (parentGroup) parentGroup.style.display = 'none';
+                if (reportUrlGroup) reportUrlGroup.style.display = 'none';
+                if (descGroup) descGroup.style.display = 'block';
             } else if (typeInput.value === '2') {
-                if (modalTitle) modalTitle.textContent = "Ajouter un Nouveau Sous-menu (Niveau 2)";
-                parentGroup.style.display = 'block';
-                optCat.style.display = '';
-                optSub.style.display = 'none';
-                reportUrlGroup.style.display = 'none';
-                descGroup.style.display = 'block';
-                if (optCat.children.length > 0) {
+                if (modalTitle) modalTitle.textContent = "Ajouter un Sous-menu";
+                if (parentGroup) parentGroup.style.display = 'block';
+                if (optCat) optCat.style.display = '';
+                if (optSub) optSub.style.display = 'none';
+                if (reportUrlGroup) reportUrlGroup.style.display = 'none';
+                if (descGroup) descGroup.style.display = 'block';
+                if (optCat && optCat.children.length > 0) {
                     document.getElementById('addItemParentId').value = optCat.children[0].value;
                 }
             } else {
-                if (modalTitle) modalTitle.textContent = "Ajouter un Nouveau Rapport (Niveau 3)";
-                parentGroup.style.display = 'block';
-                optCat.style.display = 'none';
-                optSub.style.display = '';
-                reportUrlGroup.style.display = 'block';
-                descGroup.style.display = 'none'; // Remplacé par le lien du rapport
-                if (optSub.children.length > 0) {
+                if (modalTitle) modalTitle.textContent = "Ajouter un Rapport";
+                if (parentGroup) parentGroup.style.display = 'block';
+                if (optCat) optCat.style.display = 'none';
+                if (optSub) optSub.style.display = '';
+                if (reportUrlGroup) reportUrlGroup.style.display = 'block';
+                if (descGroup) descGroup.style.display = 'none';
+                if (optSub && optSub.children.length > 0) {
                     document.getElementById('addItemParentId').value = optSub.children[0].value;
                 }
             }
@@ -603,25 +577,27 @@
             const descGroup = document.getElementById('editGroupDescription');
             const modalTitle = document.getElementById('editModalTitle');
 
+            if (!typeInput) return;
+
             if (typeInput.value === '1') {
-                if (modalTitle) modalTitle.textContent = "Modifier le Menu";
-                parentGroup.style.display = 'none';
-                reportUrlGroup.style.display = 'none';
-                descGroup.style.display = 'block';
+                if (modalTitle) modalTitle.textContent = "Modifier le Menu Principal";
+                if (parentGroup) parentGroup.style.display = 'none';
+                if (reportUrlGroup) reportUrlGroup.style.display = 'none';
+                if (descGroup) descGroup.style.display = 'block';
             } else if (typeInput.value === '2') {
                 if (modalTitle) modalTitle.textContent = "Modifier le Sous-menu";
-                parentGroup.style.display = 'block';
-                optCat.style.display = '';
-                optSub.style.display = 'none';
-                reportUrlGroup.style.display = 'none';
-                descGroup.style.display = 'block';
+                if (parentGroup) parentGroup.style.display = 'block';
+                if (optCat) optCat.style.display = '';
+                if (optSub) optSub.style.display = 'none';
+                if (reportUrlGroup) reportUrlGroup.style.display = 'none';
+                if (descGroup) descGroup.style.display = 'block';
             } else {
                 if (modalTitle) modalTitle.textContent = "Modifier le Rapport";
-                parentGroup.style.display = 'block';
-                optCat.style.display = 'none';
-                optSub.style.display = '';
-                reportUrlGroup.style.display = 'block';
-                descGroup.style.display = 'none'; // Remplacé par le lien du rapport
+                if (parentGroup) parentGroup.style.display = 'block';
+                if (optCat) optCat.style.display = 'none';
+                if (optSub) optSub.style.display = '';
+                if (reportUrlGroup) reportUrlGroup.style.display = 'block';
+                if (descGroup) descGroup.style.display = 'none';
             }
         }
 
