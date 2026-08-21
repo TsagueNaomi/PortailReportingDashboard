@@ -132,18 +132,15 @@ else if (Model.IsError)
 else
 {
     <!-- =========================================================================
-         3. RAPPORT ACTIF SÉLECTIONNÉ ET AFFICHÉ (Power BI Simulation)
+         3. RAPPORT ACTIF SÉLECTIONNÉ ET AFFICHÉ
          ========================================================================= -->
     <div class="pbi-report-container">
-        <!-- Top Dark Bar: Power BI Header -->
+        <!-- Top Bar: Report Title Header -->
         <div class="pbi-top-bar">
             <div class="pbi-top-left">
-                <span class="pbi-brand-tag">Power BI</span>
                 <span class="pbi-report-title-top">@(Model.CurrentReport?.Title ?? "Tableau de bord de reporting")</span>
             </div>
             <div class="pbi-top-right">
-                <span class="pbi-engine-badge">@(Model.CurrentReport?.Engine.ToString() ?? "PowerBI")</span>
-                <span class="pbi-refresh-badge">Actualisé en temps réel</span>
             </div>
         </div>
 

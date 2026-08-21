@@ -41,7 +41,7 @@
                         <line x1="12" y1="20" x2="12" y2="4"></line>
                         <line x1="6" y1="20" x2="6" y2="14"></line>
                     </svg>
-                    <span>📊 Statistiques &amp; Métriques (3 Cartes)</span>
+                    <span>Statistiques &amp; Métriques (3 Cartes)</span>
                 </a>
             }
 
@@ -355,9 +355,6 @@
                                     </td>
                                     <td style="text-align: center; white-space: nowrap;">
                                         <div class="table-action-btns-grid">
-                                            <a href="/?report=@report.Id" class="btn-grid-action btn-grid-read" title="Consulter le rapport dans le portail">
-                                                Ouvrir
-                                            </a>
                                             <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@report.Id', '@report.Title', '@sub.Id', '3', '@(report.Description ?? "")', '@(report.ReportUrl ?? "")')" title="Modifier ce rapport">
                                                 Modifier
                                             </button>
@@ -546,25 +543,19 @@
                 if (reportUrlGroup) reportUrlGroup.style.display = 'none';
                 if (descGroup) descGroup.style.display = 'block';
             } else if (typeInput.value === '2') {
-                if (modalTitle) modalTitle.textContent = "Ajouter un Sous-menu";
+                if (modalTitle) modalTitle.textContent = "Ajouter un Sous-menu (ou Sous-sous-menu)";
                 if (parentGroup) parentGroup.style.display = 'block';
                 if (optCat) optCat.style.display = '';
-                if (optSub) optSub.style.display = 'none';
+                if (optSub) optSub.style.display = '';
                 if (reportUrlGroup) reportUrlGroup.style.display = 'none';
                 if (descGroup) descGroup.style.display = 'block';
-                if (optCat && optCat.children.length > 0) {
-                    document.getElementById('addItemParentId').value = optCat.children[0].value;
-                }
             } else {
                 if (modalTitle) modalTitle.textContent = "Ajouter un Rapport";
                 if (parentGroup) parentGroup.style.display = 'block';
-                if (optCat) optCat.style.display = 'none';
+                if (optCat) optCat.style.display = '';
                 if (optSub) optSub.style.display = '';
                 if (reportUrlGroup) reportUrlGroup.style.display = 'block';
                 if (descGroup) descGroup.style.display = 'none';
-                if (optSub && optSub.children.length > 0) {
-                    document.getElementById('addItemParentId').value = optSub.children[0].value;
-                }
             }
         }
 
@@ -588,13 +579,13 @@
                 if (modalTitle) modalTitle.textContent = "Modifier le Sous-menu";
                 if (parentGroup) parentGroup.style.display = 'block';
                 if (optCat) optCat.style.display = '';
-                if (optSub) optSub.style.display = 'none';
+                if (optSub) optSub.style.display = '';
                 if (reportUrlGroup) reportUrlGroup.style.display = 'none';
                 if (descGroup) descGroup.style.display = 'block';
             } else {
                 if (modalTitle) modalTitle.textContent = "Modifier le Rapport";
                 if (parentGroup) parentGroup.style.display = 'block';
-                if (optCat) optCat.style.display = 'none';
+                if (optCat) optCat.style.display = '';
                 if (optSub) optSub.style.display = '';
                 if (reportUrlGroup) reportUrlGroup.style.display = 'block';
                 if (descGroup) descGroup.style.display = 'none';

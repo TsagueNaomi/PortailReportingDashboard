@@ -66,3 +66,4 @@ Thumbs.db
 *~
 .cache/
 cli_linux_x64.tar.gz
+*.deb

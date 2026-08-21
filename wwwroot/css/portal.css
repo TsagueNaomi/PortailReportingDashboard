@@ -301,13 +301,15 @@ html, body {
 }
 
 .tree-level-1-item.collapsed > .tree-cat-header .tree-caret,
-.tree-level-2-item.collapsed > .tree-sub-header .tree-caret {
+.tree-level-2-item.collapsed > .tree-sub-header .tree-caret,
+.tree-sub-item.collapsed > .tree-sub-header .tree-caret {
   transform: rotate(-90deg);
 }
 
-.tree-level-1-item.collapsed > .tree-level-2-list,
-.tree-level-2-item.collapsed > .tree-level-3-list {
-  display: none;
+.tree-level-1-item.collapsed > ul,
+.tree-level-2-item.collapsed > ul,
+.tree-sub-item.collapsed > ul {
+  display: none !important;
 }
 
 /* Level 2: Subcategories (Encaissement, Facturation, Recouvrement, etc.) */
@@ -3144,4 +3146,396 @@ html, body {
   background-color: var(--socadel-blue);
   color: #FFFFFF;
 }
+
+/* ==========================================================================
+   NEW FRONTEND FEATURES: FULLSCREEN REDUCE BUTTON, AUTH MODAL & TOASTS
+   ========================================================================== */
+
+/* Floating Fullscreen Reduce Button */
+.btn-reduce-fullscreen {
+  position: fixed;
+  top: 18px;
+  right: 24px;
+  z-index: 99999;
+  background-color: rgba(26, 32, 44, 0.88);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-reduce-fullscreen:hover {
+  background-color: rgba(229, 62, 62, 0.95);
+  border-color: #E53E3E;
+  transform: scale(1.04);
+}
+
+.btn-reduce-fullscreen svg {
+  stroke: #FFFFFF;
+}
+
+/* Toast Notifications */
+.socadel-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 100000;
+  background-color: #1E293B;
+  color: #F8FAFC;
+  padding: 12px 22px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+  border-left: 4px solid var(--socadel-green);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.socadel-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Auth / Role Switcher Modal Styles */
+.auth-modal-dialog {
+  max-width: 520px !important;
+}
+
+.auth-modal-body {
+  padding: 24px;
+}
+
+.auth-modal-intro {
+  font-size: 13.5px;
+  color: var(--socadel-text-muted);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.auth-role-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.role-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 2px solid #E2E8F0;
+  border-radius: 10px;
+  background-color: #FFFFFF;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.role-card:hover {
+  border-color: var(--socadel-blue);
+  background-color: #F8FAFC;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(29, 112, 184, 0.12);
+}
+
+.role-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.role-card-user .role-card-icon {
+  background-color: #EBF8FF;
+  color: #3182CE;
+}
+
+.role-card-admin .role-card-icon {
+  background-color: #FEFCBF;
+  color: #D69E2E;
+}
+
+.role-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.role-card-info strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A202C;
+}
+
+.role-card-info span {
+  font-size: 12.5px;
+  color: #718096;
+  line-height: 1.35;
+}
+
+/* Rotation animation for refresh button */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.rotating {
+  animation: spin 0.75s linear infinite;
+}
+
+/* User Role Access Control: Hide Administration Buttons in Simple User Mode */
+body[data-user-role="user"] .sidebar-admin-box,
+body[data-user-role="user"] .header-admin-action-btn.go-to-admin,
+body[data-user-role="user"] .go-to-admin {
+  display: none !important;
+}
+
+/* Multi-level Recursive Submenu Styles */
+.tree-level-2-list .tree-level-2-list {
+  padding-left: 12px;
+  margin: 3px 0 4px 6px;
+  border-left: 2px dotted var(--socadel-blue);
+}
+
+.tree-level-2-list .tree-level-2-list .tree-sub-header {
+  font-size: 12.5px;
+  color: var(--socadel-blue-dark);
+}
+
+/* Deep nested tree carets animation & pointer */
+.tree-sub-header .tree-caret {
+  cursor: pointer;
+}
+
+/* Header Logout Button */
+.header-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.header-logout-btn:hover {
+  background-color: #E53E3E;
+  border-color: #E53E3E;
+  color: #FFFFFF;
+}
+
+/* Startup Fullscreen Login Overlay */
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-modal-dialog {
+  width: 100%;
+  max-width: 480px;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.login-card-header {
+  background: linear-gradient(135deg, var(--socadel-blue-dark), var(--socadel-blue));
+  color: #FFFFFF;
+  padding: 28px 24px 22px 24px;
+  text-align: center;
+}
+
+.login-logo-img {
+  max-height: 48px;
+  width: auto;
+  background: #FFFFFF;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.login-card-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.2px;
+}
+
+.login-card-header p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.login-modal-body {
+  padding: 22px 24px;
+}
+
+.login-input {
+  height: 42px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #CBD5E1;
+  padding: 0 14px;
+  width: 100%;
+}
+
+.login-input:focus {
+  border-color: var(--socadel-blue);
+  box-shadow: 0 0 0 3px rgba(29, 112, 184, 0.15);
+}
+
+.login-quick-fills {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #E2E8F0;
+}
+
+.quick-fill-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
+  margin-bottom: 8px;
+}
+
+.quick-fill-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-quick-fill {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid #CBD5E1;
+  background-color: #F8FAFC;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-quick-fill:hover {
+  background-color: #EDF2F7;
+  border-color: var(--socadel-blue);
+  color: var(--socadel-blue);
+}
+
+.login-credentials-info {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background-color: #F1F5F9;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.cred-info-title {
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.cred-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.cred-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.role-tag {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.role-tag.user-tag {
+  background-color: #DBEAFE;
+  color: #1E40AF;
+}
+
+.role-tag.admin-tag {
+  background-color: #FEF3C7;
+  color: #92400E;
+}
+
+.cred-text {
+  color: #475569;
+  font-size: 11.5px;
+}
+
+.cred-text code {
+  background-color: #E2E8F0;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.login-modal-footer {
+  padding: 14px 24px 22px 24px;
+}
+
+.btn-login-submit {
+  width: 100%;
+  height: 44px;
+  background-color: var(--socadel-blue);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, transform 0.1s;
+}
+
+.btn-login-submit:hover {
+  background-color: var(--socadel-blue-dark);
+}
+
+
+
 

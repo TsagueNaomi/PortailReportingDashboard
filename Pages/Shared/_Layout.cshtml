@@ -1,4 +1,6 @@
 @inject INavigationService NavService
+@using PortailSocadel.Models
+@using PortailSocadel.Services
 @{
     var tree = NavService.GetMenuTree();
     var activeReportId = ViewData["ActiveReportId"]?.ToString() ?? Context.Request.Query["report"].ToString();
@@ -28,6 +30,57 @@
     else
     {
         breadcrumbs = new List<string> { "Portail", "Accueil" };
+    }
+}
+@functions {
+    public static Microsoft.AspNetCore.Html.IHtmlContent RenderSubTree(List<MenuItem> items, string activeReportId, bool isHome)
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append("<ul class=\"tree-level-2-list tree-sub-list\">");
+        foreach (var item in items)
+        {
+            var hasChildren = item.Children != null && item.Children.Any();
+            var isReport = item.Type == ItemType.Report;
+            var isItemActive = !string.IsNullOrEmpty(activeReportId) && (item.Id == activeReportId || (hasChildren && HasActiveDescendant(item, activeReportId)));
+            var isCollapsed = !isItemActive;
+
+            if (isReport)
+            {
+                var isActive = item.Id == activeReportId;
+                sb.Append($"<li class=\"tree-level-3-item tree-report-item\" data-id=\"{item.Id}\" data-title=\"{item.Title}\">");
+                sb.Append($"<a href=\"/?report={item.Id}\" class=\"tree-report-link {(isActive ? "active" : "")}\" data-id=\"{item.Id}\" data-title=\"{item.Title}\" data-url=\"{item.ReportUrl ?? ""}\" title=\"{item.Description ?? ""}\">");
+                sb.Append("<span class=\"tree-report-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"3\" y1=\"9\" x2=\"21\" y2=\"9\"></line><line x1=\"9\" y1=\"21\" x2=\"9\" y2=\"9\"></line></svg></span>");
+                sb.Append($"<span class=\"report-link-text\">{item.Title}</span>");
+                sb.Append("</a></li>");
+            }
+            else
+            {
+                sb.Append($"<li class=\"tree-level-2-item tree-sub-item {(isCollapsed ? "collapsed" : "")}\" data-id=\"{item.Id}\" data-title=\"{item.Title}\">");
+                sb.Append($"<div class=\"tree-sub-header\" title=\"{item.Description ?? ""}\">");
+                sb.Append("<span class=\"tree-caret\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg></span>");
+                sb.Append("<span class=\"tree-level-icon sub-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z\"></path><line x1=\"12\" y1=\"11\" x2=\"12\" y2=\"17\"></line><line x1=\"9\" y1=\"14\" x2=\"15\" y2=\"14\"></line></svg></span>");
+                sb.Append($"<span class=\"tree-title\">{item.Title}</span>");
+                sb.Append("</div>");
+                
+                if (hasChildren)
+                {
+                    sb.Append(RenderSubTree(item.Children, activeReportId, isHome).ToString());
+                }
+                sb.Append("</li>");
+            }
+        }
+        sb.Append("</ul>");
+        return new Microsoft.AspNetCore.Html.HtmlString(sb.ToString());
+    }
+
+    public static bool HasActiveDescendant(MenuItem parent, string activeReportId)
+    {
+        if (parent.Children == null) return false;
+        foreach (var child in parent.Children)
+        {
+            if (child.Id == activeReportId || HasActiveDescendant(child, activeReportId)) return true;
+        }
+        return false;
     }
 }
 <!DOCTYPE html>
@@ -73,15 +126,14 @@
             <!-- Search match status indicator (hidden by default) -->
             <div id="sidebarSearchBadge" class="sidebar-search-badge" style="display: none;"></div>
 
-            <!-- 1.3 Collapsible / Expandable Tree Menu (3 Levels) -->
+            <!-- 1.3 Collapsible / Expandable Tree Menu (Multi-Levels Recursive) -->
             <nav class="sidebar-nav-container" aria-label="Menu principal">
                 <ul class="tree-root" id="sidebarTreeRoot">
                     @foreach (var cat in tree)
                     {
-                        var isCatActive = !string.IsNullOrEmpty(activeReportId) && cat.Children.Any(s => s.Children.Any(r => r.Id == activeReportId));
+                        var isCatActive = !string.IsNullOrEmpty(activeReportId) && HasActiveDescendant(cat, activeReportId);
                         var isCommercial = cat.Title.Equals("Commercial", StringComparison.OrdinalIgnoreCase);
-                        // Commercial is open by default or if category contains active item
-                        var isCatCollapsed = !isCatActive && !isCommercial && !isHome;
+                        var isCatCollapsed = !isCatActive;
 
                         <li class="tree-level-1-item @(isCatCollapsed ? "collapsed" : "")" data-id="@cat.Id" data-title="@cat.Title">
                             <div class="tree-cat-header" title="@cat.Description">
@@ -100,67 +152,14 @@
 
                             @if (cat.Children.Any())
                             {
-                                <ul class="tree-level-2-list">
-                                    @foreach (var sub in cat.Children)
-                                    {
-                                        var isSubActive = !string.IsNullOrEmpty(activeReportId) && sub.Children.Any(r => r.Id == activeReportId);
-                                        // Open first subcategory of commercial by default, or open if it contains the active report
-                                        var isFirstSubOfCommercial = isCommercial && sub.Order == 1 && isHome;
-                                        var isSubCollapsed = !isSubActive && !isFirstSubOfCommercial;
-
-                                        <li class="tree-level-2-item @(isSubCollapsed ? "collapsed" : "")" data-id="@sub.Id" data-title="@sub.Title">
-                                            <div class="tree-sub-header" title="@sub.Description">
-                                                <span class="tree-caret">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                                    </svg>
-                                                </span>
-                                                <span class="tree-level-icon sub-icon">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                                        <line x1="12" y1="11" x2="12" y2="17"></line>
-                                                        <line x1="9" y1="14" x2="15" y2="14"></line>
-                                                    </svg>
-                                                </span>
-                                                <span class="tree-title">@sub.Title</span>
-                                            </div>
-
-                                            @if (sub.Children.Any())
-                                            {
-                                                <ul class="tree-level-3-list">
-                                                    @foreach (var report in sub.Children)
-                                                    {
-                                                        var isActive = report.Id == activeReportId;
-                                                        <li class="tree-level-3-item" data-id="@report.Id" data-title="@report.Title @sub.Title @cat.Title">
-                                                            <a href="/?report=@report.Id" 
-                                                               class="tree-report-link @(isActive ? "active" : "")" 
-                                                               data-id="@report.Id"
-                                                               data-title="@report.Title - @sub.Title"
-                                                               data-url="@(report.ReportUrl ?? "")"
-                                                               title="@report.Description">
-                                                                <span class="tree-report-icon">
-                                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                                                        <line x1="3" y1="9" x2="21" y2="9"></line>
-                                                                        <line x1="9" y1="21" x2="9" y2="9"></line>
-                                                                    </svg>
-                                                                </span>
-                                                                <span class="report-link-text">@report.Title</span>
-                                                            </a>
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            }
-                                        </li>
-                                    }
-                                </ul>
+                                @RenderSubTree(cat.Children, activeReportId, isHome)
                             }
                         </li>
                     }
                 </ul>
             </nav>
 
-            <!-- 1.4 Dedicated Back-Office Administration Box (Point 8) -->
+            <!-- 1.4 Dedicated Back-Office Administration Box (Visible only when in Admin Role) -->
             <div class="sidebar-admin-box">
                 <a href="/Admin" class="sidebar-admin-card @(isAdmin ? "active" : "")" title="Console d'Administration & Back-Office">
                     <div class="sidebar-admin-icon">
@@ -199,13 +198,13 @@
                     </a>
                 </div>
 
-                <!-- Centered Enhanced Search Bar in Blue Header (Point 7) -->
+                <!-- Centered Enhanced Search Bar in Blue Header -->
                 <div class="header-search-container" id="headerSearchBox">
                     <svg class="header-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input type="text" id="headerSearchInput" class="header-search-input" placeholder="Rechercher un rapport ou un processus..." autocomplete="off" />
+                    <input type="text" id="headerSearchInput" class="header-search-input" placeholder="Rechercher un rapport..." autocomplete="off" />
                     <button type="button" id="headerSearchClear" class="header-search-clear-btn" title="Effacer" style="display:none;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -216,7 +215,7 @@
                     <div id="headerSearchResults" class="header-search-results-dropdown" style="display:none;"></div>
                 </div>
 
-                <!-- Right Section: Back-office Access + Single User Name Profile (Point 4 & 8) -->
+                <!-- Right Section: Administration Link + User Role Switcher -->
                 <div class="header-right-area">
                     @if (isAdmin)
                     {
@@ -239,17 +238,23 @@
                         </a>
                     }
 
-                    <!-- User Profile: Clean single name, no duplicate, no quick-access dropdown (Point 4) -->
-                    <div class="header-user-badge" title="Session active : Naomi Tsague">
+                    <!-- User Profile & Logout -->
+                    <div class="header-user-badge">
                         <span class="user-single-name">Naomi Tsague</span>
-                        <div class="user-avatar-circle" aria-hidden="true">
-                            <span>NT</span>
-                        </div>
                     </div>
+
+                    <button type="button" class="header-logout-btn" onclick="logoutApp()" title="Se déconnecter de la session">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Déconnexion</span>
+                    </button>
                 </div>
             </header>
 
-            <!-- 2.2 Sub-Header (Enhanced Breadcrumbs on Left, Green Action Buttons on Right) -->
+            <!-- 2.2 Sub-Header -->
             <div class="page-subheader">
                 <nav class="breadcrumb-nav" aria-label="Fil d'Ariane">
                     <a href="/" class="breadcrumb-home-link" title="Accueil">
@@ -317,7 +322,7 @@
                 </nav>
 
                 <div class="subheader-actions">
-                    <!-- Plein écran button (Green square) -->
+                    <!-- Plein écran button -->
                     <button type="button" class="action-btn-green" id="btnFullscreen" title="Basculer en plein écran" aria-label="Plein écran">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="15 3 21 3 21 9"></polyline>
@@ -326,7 +331,7 @@
                             <line x1="3" y1="21" x2="10" y2="14"></line>
                         </svg>
                     </button>
-                    <!-- Actualiser button (Green square) -->
+                    <!-- Actualiser button -->
                     <button type="button" class="action-btn-green" id="btnRefresh" title="Actualiser le rapport" aria-label="Actualiser">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19" />
@@ -340,6 +345,44 @@
                 @RenderBody()
             </section>
         </main>
+    </div>
+
+    <!-- MODAL OVERLAY: Formulaire de Connexion Obligatoire au Démarrage -->
+    <div class="modal-overlay login-overlay" id="modalAppLogin" style="display: flex;">
+        <div class="modal-dialog login-modal-dialog">
+            <div class="login-card-header">
+                <img src="/images/logo-socadel.jpg" alt="SOCADEL Logo" class="login-logo-img" />
+                <h2>Portail Décisionnel SOCADEL</h2>
+                <p>Portail de reporting &amp; dashboard - Veuillez vous connecter avec vos identifiants d'accès</p>
+            </div>
+
+            <!-- Formulaire de Connexion -->
+            <form id="formAppLogin" onsubmit="handleLoginSubmit(event)">
+                <div class="login-modal-body">
+                    <div id="loginAlert" class="login-alert" style="display: none;"></div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="loginEmail">Adresse e-mail *</label>
+                        <input type="email" id="loginEmail" class="form-control login-input" placeholder="ex: user@socadel.cm" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">Mot de passe *</label>
+                        <input type="password" id="loginPassword" class="form-control login-input" placeholder="••••••••" required />
+                    </div>
+                </div>
+
+                <div class="login-modal-footer">
+                    <button type="submit" class="btn-login-submit">
+                        <span>Se connecter</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Master Scripts -->

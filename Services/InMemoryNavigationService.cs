@@ -71,6 +71,56 @@ namespace PortailSocadel.Services
                     Description = "Analyse des règlements par espèces, virements, cartes et mobile money" 
                 });
 
+                // 1.1.1 RELEVES (Sous-menu dans Encaissement)
+                var releves = new MenuItem
+                {
+                    Id = "sub-releves",
+                    Title = "RELEVES",
+                    ParentId = encaissement.Id,
+                    Type = ItemType.SubCategory,
+                    Order = 3,
+                    IsActive = true,
+                    Code = "REL",
+                    Description = "Sous-menu RELEVES sous Encaissement"
+                };
+                _items.Add(releves);
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-rel-synth", 
+                    Title = "Synthèse des relevés d'index", 
+                    ParentId = releves.Id, 
+                    Type = ItemType.Report, 
+                    Order = 1, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-REL-01",
+                    Description = "Rapport de synthèse sur les relevés d'index de consommation" 
+                });
+
+                // 1.1.1.1 Relevés Spéciaux (Sous-sous-menu dans RELEVES)
+                var relevesSpeciaux = new MenuItem
+                {
+                    Id = "sub-releves-speciaux",
+                    Title = "Relevés Spéciaux",
+                    ParentId = releves.Id,
+                    Type = ItemType.SubCategory,
+                    Order = 2,
+                    IsActive = true,
+                    Code = "REL-SPEC",
+                    Description = "Sous-sous-menu Relevés Spéciaux sous RELEVES"
+                };
+                _items.Add(relevesSpeciaux);
+                _items.Add(new MenuItem 
+                { 
+                    Id = "rep-rel-spec-01", 
+                    Title = "Suivi des relèves haute tension & industrielles", 
+                    ParentId = relevesSpeciaux.Id, 
+                    Type = ItemType.Report, 
+                    Order = 1, 
+                    Engine = ReportEngine.PowerBI, 
+                    Code = "REP-REL-SPEC-01",
+                    Description = "Rapport spécialisé sur les relèves des compteurs industriels" 
+                });
+
                 // 1.2 Facturation
                 var facturation = new MenuItem
                 {
