@@ -1,0 +1,68 @@
+@page
+@model PortailSocadel.Pages.LoginModel
+@{
+    ViewData["Title"] = "Connexion - Portail SOCADEL";
+}
+
+<div class="auth-wrapper py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                    <div class="card-header bg-gradient-primary text-white p-4 text-center border-0" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                        <div class="auth-icon mb-3">
+                            <span class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle p-3 shadow" style="width: 64px; height: 64px;">
+                                <i class="bi bi-shield-lock-fill fs-2"></i>
+                            </span>
+                        </div>
+                        <h3 class="fw-bold mb-1">Connexion Portail</h3>
+                        <p class="text-muted text-light small mb-0">Accédez à vos tableaux de bord et rapports SOCADEL</p>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5 bg-white">
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <div asp-validation-summary="All" class="d-inline text-start mb-0"></div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        <form method="post">
+                            <div class="mb-4">
+                                <label asp-for="Input.Email" class="form-label fw-semibold text-secondary">Adresse E-mail</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-envelope"></i></span>
+                                    <input asp-for="Input.Email" class="form-control bg-light border-start-0 py-2" placeholder="ex: utilisateur@socadel.cm" autocomplete="username" required />
+                                </div>
+                                <span asp-validation-for="Input.Email" class="text-danger small ms-1"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="Input.Password" class="form-label fw-semibold text-secondary">Mot de passe</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-key"></i></span>
+                                    <input asp-for="Input.Password" class="form-control bg-light border-start-0 py-2" type="password" placeholder="••••••••" autocomplete="current-password" required />
+                                </div>
+                                <span asp-validation-for="Input.Password" class="text-danger small ms-1"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm mb-4" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">
+                                <i class="bi bi-box-arrow-in-right me-2"></i> Se Connecter
+                            </button>
+                        </form>
+
+                        <div class="p-3 bg-light rounded-3 border">
+                            <h6 class="fw-bold mb-2 text-dark small"><i class="bi bi-info-circle-fill text-primary me-2"></i> Comptes de démonstration :</h6>
+                            <div class="d-flex flex-column gap-1 small text-muted">
+                                <div><strong class="text-dark">Administrateur :</strong> <code>admin@socadel.cm</code> / <code>Admin123!</code></div>
+                                <div><strong class="text-dark">Utilisateur :</strong> <code>user@socadel.cm</code> / <code>User123!</code></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
