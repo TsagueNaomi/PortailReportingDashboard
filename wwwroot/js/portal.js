@@ -52,83 +52,11 @@ function applyRoleUI(role) {
 }
 
 function initAuthSystem() {
-    let currentRole = localStorage.getItem('socadel_user_role') || 'user';
-    const isLoggedIn = localStorage.getItem('socadel_logged_in') === 'true';
-    const loginModal = document.getElementById('modalAppLogin');
-
-    if (!isLoggedIn) {
-        if (loginModal) loginModal.style.display = 'flex';
-    } else {
-        if (loginModal) loginModal.style.display = 'none';
-    }
-
-    applyRoleUI(currentRole);
-
-    // Profile badge displays name only
     const userBadge = document.querySelector('.header-user-badge');
     if (userBadge) {
         userBadge.style.cursor = 'default';
     }
-
-    window.switchRole = function (newRole) {
-        currentRole = newRole;
-        localStorage.setItem('socadel_user_role', newRole);
-        applyRoleUI(newRole);
-        closeAuthModal();
-        showToast(newRole === 'admin' ? "Connecté en tant qu'Administrateur" : "Connecté en tant que Simple Utilisateur");
-    };
 }
-
-window.handleLoginSubmit = function (e) {
-    e.preventDefault();
-    const emailInput = document.getElementById('loginEmail');
-    const passwordInput = document.getElementById('loginPassword');
-    const alertBox = document.getElementById('loginAlert');
-    if (!emailInput || !passwordInput) return;
-
-    const email = emailInput.value.trim().toLowerCase();
-    const password = passwordInput.value.trim();
-
-    let role = 'user';
-    if (email === 'admin@socadel.cm' || email.includes('admin')) {
-        role = 'admin';
-    } else {
-        role = 'user';
-    }
-
-    localStorage.setItem('socadel_logged_in', 'true');
-    localStorage.setItem('socadel_user_role', role);
-    localStorage.setItem('socadel_user_email', email);
-
-    const loginModal = document.getElementById('modalAppLogin');
-    if (loginModal) loginModal.style.display = 'none';
-
-    applyRoleUI(role);
-    showToast(`Bienvenue ! Connecté en tant que ${role === 'admin' ? 'Administrateur' : 'Simple Utilisateur'}`);
-
-    if (role === 'admin' && !window.location.pathname.toLowerCase().startsWith('/admin')) {
-        window.location.href = '/Admin';
-    } else if (role === 'user' && window.location.pathname.toLowerCase().startsWith('/admin')) {
-        window.location.href = '/';
-    }
-};
-
-window.fillLoginCredentials = function (email, password) {
-    const emailInput = document.getElementById('loginEmail');
-    const passwordInput = document.getElementById('loginPassword');
-    if (emailInput) emailInput.value = email;
-    if (passwordInput) passwordInput.value = password;
-};
-
-window.logoutApp = function () {
-    localStorage.removeItem('socadel_logged_in');
-    showToast("Vous êtes déconnecté.");
-    const loginModal = document.getElementById('modalAppLogin');
-    if (loginModal) loginModal.style.display = 'flex';
-    if (window.location.pathname.toLowerCase().startsWith('/admin')) {
-        window.location.href = '/';
-    }
-};
 
 function openAuthModal() {
     let modal = document.getElementById('modalAuthRole');
@@ -240,6 +168,24 @@ function initSearchFilter() {
     const headerClear = document.getElementById('headerSearchClear');
     const headerResults = document.getElementById('headerSearchResults');
 
+    function highlightText(originalText, query) {
+        if (!originalText) return '';
+        const cleanQuery = (query || '').trim();
+        if (!cleanQuery) return escapeHtml(originalText);
+
+        const normOriginal = normalizeText(originalText);
+        const normQuery = normalizeText(cleanQuery);
+        const matchIdx = normOriginal.indexOf(normQuery);
+
+        if (matchIdx === -1) return escapeHtml(originalText);
+
+        const matchedPart = originalText.substring(matchIdx, matchIdx + cleanQuery.length);
+        const before = originalText.substring(0, matchIdx);
+        const after = originalText.substring(matchIdx + cleanQuery.length);
+
+        return `${escapeHtml(before)}<mark class="search-highlight">${escapeHtml(matchedPart)}</mark>${escapeHtml(after)}`;
+    }
+
     function performTreeSearch(query) {
         const term = normalizeText(query).trim();
         const reportItems = document.querySelectorAll('.tree-level-3-item, .tree-report-item');
@@ -256,7 +202,7 @@ function initSearchFilter() {
                 item.style.display = '';
                 const link = item.querySelector('.report-link-text');
                 if (link && link.getAttribute('data-original')) {
-                    link.innerHTML = link.getAttribute('data-original');
+                    link.innerHTML = escapeHtml(link.getAttribute('data-original'));
                 }
             });
 
@@ -282,6 +228,7 @@ function initSearchFilter() {
             if (normalizedDataTitle.includes(term)) {
                 matchCount++;
                 item.style.display = '';
+                textSpan.innerHTML = highlightText(rawText, query);
 
                 // Expand parent elements
                 let p = item.parentElement;
@@ -294,6 +241,7 @@ function initSearchFilter() {
                 }
             } else {
                 item.style.display = 'none';
+                textSpan.innerHTML = escapeHtml(rawText);
             }
         });
 
@@ -357,7 +305,7 @@ function initSearchFilter() {
         } else {
             headerResults.innerHTML = matches.slice(0, 6).map(m => `
                 <a href="/?report=${m.id}" class="search-result-item">
-                    <span class="search-result-title">${escapeHtml(m.title)}</span>
+                    <span class="search-result-title">${highlightText(m.title, query)}</span>
                     <span class="search-result-path">${escapeHtml(m.path)}</span>
                 </a>
             `).join('');
@@ -763,3 +711,21 @@ window.handleBreadcrumbClick = function (e, nodeId) {
 };
 
 window.toggleSidebarMenuFromBreadcrumb = window.handleBreadcrumbClick;
+
+/* ==========================================================================
+   8. Standardized Report Error Handler (interface-03-erreur.png)
+   ========================================================================== */
+window.showSocadelReportError = function() {
+    const errorBox = document.getElementById('customIframeErrorState');
+    const iframe = document.getElementById('reportIframe');
+    if (errorBox) {
+        errorBox.style.display = 'flex';
+    }
+    if (iframe) {
+        iframe.style.display = 'none';
+    }
+};
+
+window.retryReportLoading = function(btn) {
+    window.location.reload();
+};

@@ -5,13 +5,59 @@ namespace PortailSocadel.Data
 {
     public static class DbSeeder
     {
+        private static readonly string DataFilePath = Path.Combine(Directory.GetCurrentDirectory(), "portailsocadel_store.json");
+
+        public class AppDataDto
+        {
+            public List<MenuItem> MenuItems { get; set; } = new();
+            public List<User> Users { get; set; } = new();
+        }
+
+        public static void SaveData(AppDbContext context)
+        {
+            try
+            {
+                var dto = new AppDataDto
+                {
+                    MenuItems = context.MenuItems.AsNoTracking().ToList(),
+                    Users = context.Users.AsNoTracking().ToList()
+                };
+                var options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+                var json = System.Text.Json.JsonSerializer.Serialize(dto, options);
+                File.WriteAllText(DataFilePath, json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[PERSISTENCE SAVE ERROR] {ex.Message}");
+            }
+        }
+
         public static void Initialize(IServiceProvider serviceProvider)
         {
-            using var context = new AppDbContext(
-                serviceProvider.GetRequiredService<DbContextOptions<AppDbContext>>());
+            using var scope = serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            // Create database automatically
-            context.Database.EnsureCreated();
+            try
+            {
+                context.Database.EnsureCreated();
+            }
+            catch { }
+
+            // 1. Restore Users if missing
+            if (File.Exists(DataFilePath) && !context.Users.Any())
+            {
+                try
+                {
+                    var json = File.ReadAllText(DataFilePath);
+                    var dto = System.Text.Json.JsonSerializer.Deserialize<AppDataDto>(json);
+                    if (dto?.Users != null && dto.Users.Any())
+                    {
+                        context.Users.AddRange(dto.Users);
+                        context.SaveChanges();
+                    }
+                }
+                catch { }
+            }
 
             // Seed Users if empty
             if (!context.Users.Any())
@@ -46,11 +92,46 @@ namespace PortailSocadel.Data
             }
 
             // Look for any menu items.
+            if (!context.MenuItems.Any())
+            {
+                if (File.Exists(DataFilePath))
+                {
+                    try
+                    {
+                        var json = File.ReadAllText(DataFilePath);
+                        var dto = System.Text.Json.JsonSerializer.Deserialize<AppDataDto>(json);
+                        if (dto?.MenuItems != null && dto.MenuItems.Any())
+                        {
+                            context.MenuItems.AddRange(dto.MenuItems);
+                            context.SaveChanges();
+                            return;
+                        }
+                    }
+                    catch { }
+                }
+
+                SeedMenuItems(context);
+                SaveData(context);
+            }
+            else
+            {
+                // Ensure store backup is always up to date
+                SaveData(context);
+            }
+        }
+
+        public static void ReSeedDefaults(AppDbContext context)
+        {
             if (context.MenuItems.Any())
             {
-                return;   // DB has been seeded
+                context.MenuItems.RemoveRange(context.MenuItems);
+                context.SaveChanges();
             }
+            SeedMenuItems(context);
+        }
 
+        public static void SeedMenuItems(AppDbContext context)
+        {
             var items = new List<MenuItem>();
 
             // =============================================================
@@ -63,8 +144,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.Category,
                 Order = 1,
                 IsActive = true,
-                Code = "DIR-COMM",
-                Description = "Direction Commerciale et Gestion de la Clientèle",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -79,8 +158,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.SubCategory,
                 Order = 1,
                 IsActive = true,
-                Code = "ENC",
-                Description = "Suivi des encaissements, caisses et modes de paiement",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -93,9 +170,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 1, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-ENC-01",
                 ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
-                Description = "Suivi quotidien des flux de caisse, dépôts bancaires et ventilations par agence",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -107,9 +182,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 2, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-ENC-02",
                 ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
-                Description = "Analyse des règlements par espèces, virements, cartes et mobile money",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -123,8 +196,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.SubCategory,
                 Order = 3,
                 IsActive = true,
-                Code = "REL",
-                Description = "Sous-menu RELEVES sous Encaissement",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -137,8 +208,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 1, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-REL-01",
-                Description = "Rapport de synthèse sur les relevés d'index de consommation",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -152,8 +222,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.SubCategory,
                 Order = 2,
                 IsActive = true,
-                Code = "REL-SPEC",
-                Description = "Sous-sous-menu Relevés Spéciaux sous RELEVES",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -165,9 +233,8 @@ namespace PortailSocadel.Data
                 ParentId = relevesSpeciaux.Id, 
                 Type = ItemType.Report, 
                 Order = 1, 
-                Engine = ReportEngine.PowerBI, 
-                Code = "REP-REL-SPEC-01",
-                Description = "Rapport spécialisé sur les relèves des compteurs industriels",
+                Engine = ReportEngine.SSRS, 
+                ReportUrl = "http://ssrs.socadel.cm/Reports/Pages/Report.aspx?ItemPath=/Commercial/RelevesHT",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -181,8 +248,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.SubCategory,
                 Order = 2,
                 IsActive = true,
-                Code = "FAC",
-                Description = "Gestion des émissions de factures et volumes d'énergie",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -195,8 +260,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 1, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-FAC-01",
-                Description = "Volumes d'énergie facturés, montants HT/TTC et analyse comparative M-1",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -208,8 +272,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 2, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-FAC-02",
-                Description = "Facturation haute tension et suivi des gros consommateurs",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -223,8 +286,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.SubCategory,
                 Order = 3,
                 IsActive = true,
-                Code = "REC",
-                Description = "Suivi des impayés, balance âgée et contentieux",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -237,8 +298,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 1, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-REC-01",
-                Description = "Tableau de bord de recouvrement commercial et balance âgée des créances",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -250,8 +310,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 2, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-REC-02",
-                Description = "Suivi des créances contentieuses et actions juridiques",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -265,8 +324,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.SubCategory,
                 Order = 4,
                 IsActive = true,
-                Code = "ABO",
-                Description = "Contrats et parcs d'abonnés",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -279,8 +336,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 1, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-ABO-01",
-                Description = "Statistiques sur les souscriptions actives par catégorie tarifaire",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -292,8 +348,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 2, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-ABO-02",
-                Description = "Analyse des motifs de résiliation et réactivations",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -307,8 +362,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.SubCategory,
                 Order = 5,
                 IsActive = true,
-                Code = "CPT",
-                Description = "Parc de compteurs, relèves et détection d'anomalies",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -321,8 +374,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 1, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-CPT-01",
-                Description = "Statut du parc de compteurs électromécaniques, électroniques et communicants",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -334,9 +386,8 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 2, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-CPT-02",
                 SimulateError = true, 
-                Description = "Détection des index incohérents, compteurs bloqués et tentatives de fraude",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -350,8 +401,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.SubCategory,
                 Order = 6,
                 IsActive = true,
-                Code = "BRA",
-                Description = "Raccordements au réseau électrique",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -364,8 +413,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 1, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-BRA-01",
-                Description = "Temps moyen d'instruction des demandes et délais de raccordement",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -377,8 +425,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 2, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-BRA-02",
-                Description = "Avancement des devis et travaux de branchement exécutés",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -393,8 +440,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.Category,
                 Order = 2,
                 IsActive = true,
-                Code = "DIR-FIN",
-                Description = "Direction Financière et Comptable",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -409,8 +454,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.SubCategory,
                 Order = 1,
                 IsActive = true,
-                Code = "TRE",
-                Description = "Flux de trésorerie et comptes bancaires",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -423,8 +466,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 1, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-TRE-01",
-                Description = "Solde consolidé des comptes bancaires, encaissements et décaissements du jour",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -436,8 +478,7 @@ namespace PortailSocadel.Data
                 Type = ItemType.Report, 
                 Order = 2, 
                 Engine = ReportEngine.PowerBI, 
-                Code = "REP-TRE-02",
-                Description = "Modélisation des encaissements et décaissements prévisionnels à 30 jours",
+                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -451,8 +492,6 @@ namespace PortailSocadel.Data
                 Type = ItemType.SubCategory,
                 Order = 2,
                 IsActive = true,
-                Code = "BUD",
-                Description = "Suivi budgétaire et engagements par direction",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -464,9 +503,8 @@ namespace PortailSocadel.Data
                 ParentId = budget.Id, 
                 Type = ItemType.Report, 
                 Order = 1, 
-                Engine = ReportEngine.PowerBI, 
-                Code = "REP-BUD-01",
-                Description = "Taux de consommation des crédits budgétaires OPEX et CAPEX",
+                Engine = ReportEngine.SSRS, 
+                ReportUrl = "http://ssrs.socadel.cm/Reports/Pages/Report.aspx?ItemPath=/Finance/ExecBudgetaire",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
@@ -477,15 +515,15 @@ namespace PortailSocadel.Data
                 ParentId = budget.Id, 
                 Type = ItemType.Report, 
                 Order = 2, 
-                Engine = ReportEngine.PowerBI, 
-                Code = "REP-BUD-02",
-                Description = "Contrôle budgétaire analytique et alertes de dépassement de lignes",
+                Engine = ReportEngine.SSRS, 
+                ReportUrl = "http://ssrs.socadel.cm/Reports/Pages/Report.aspx?ItemPath=/Finance/EcartsBudgetaires",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
 
             context.MenuItems.AddRange(items);
             context.SaveChanges();
+            SaveData(context);
         }
     }
 }

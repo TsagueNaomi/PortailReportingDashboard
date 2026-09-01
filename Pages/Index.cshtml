@@ -26,7 +26,7 @@
                 </div>
 
                 <!-- Titre et instruction -->
-                <h1 class="home-title">Bienvenue sur le portail de reporting</h1>
+                <h1 class="home-title">Bienvenue sur le portail de reporting and Dashboard</h1>
                 <p class="home-subtitle">Accédez aux rapports et tableaux de bord décisionnels de SOCADEL. Explorez nos rapports les plus consultés ou naviguez dans l'arborescence complète.</p>
             </div>
         </div>
@@ -88,45 +88,28 @@
 else if (Model.IsError)
 {
     <!-- =========================================================================
-         2. ÉTAT D'ERREUR INTÉGRÉ AU RAPPORT SÉLECTIONNÉ (Point 3)
+         2. ÉTAT D'ERREUR INTÉGRÉ AU RAPPORT SÉLECTIONNÉ (Fidèle à interface-03-erreur.png)
          ========================================================================= -->
-    <div class="error-screen-container">
-        <!-- Warning Triangle Icon -->
-        <div class="error-warning-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
+    <div class="pbi-report-container" style="display: flex; align-items: center; justify-content: center; min-height: 480px; background: #FFFFFF; border: 1px solid var(--socadel-card-border); border-radius: 8px;">
+        <div class="error-screen-container">
+            <!-- Warning Triangle Icon -->
+            <div class="error-warning-icon" aria-hidden="true">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#E58A2B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+
+            <!-- Error Messages -->
+            <h2 class="error-main-title">Impossible de charger le rapport.</h2>
+            <p class="error-sub-title">Veuillez réessayer.</p>
+
+            <!-- Action Button -->
+            <button type="button" class="btn-retry-action" onclick="window.location.reload()">
+                Réessayer
+            </button>
         </div>
-
-        <!-- Error Messages -->
-        <h2 class="error-main-title">Impossible de charger le rapport.</h2>
-        <p class="error-sub-title">Veuillez réessayer.</p>
-
-        <!-- Technical Context Card -->
-        <div class="error-details-box">
-            <div class="error-detail-row">
-                <span class="error-detail-label">Rapport sélectionné :</span>
-                <span class="error-detail-value">@(Model.CurrentReport?.Title ?? "Rapport décisionnel")</span>
-            </div>
-            <div class="error-detail-row">
-                <span class="error-detail-label">Code d'incident :</span>
-                <span class="error-detail-value error-code-pill">ERR_GATEWAY_TIMEOUT (504)</span>
-            </div>
-            <div class="error-detail-row">
-                <span class="error-detail-label">Diagnostic :</span>
-                <span class="error-detail-value">La source de données distante ne répond pas dans le délai imparti.</span>
-            </div>
-        </div>
-
-        <!-- Action Button -->
-        <button type="button" class="btn-retry-action" onclick="retryReportLoading(this)">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19"></path>
-            </svg>
-            <span>Réessayer</span>
-        </button>
     </div>
 }
 else
@@ -146,16 +129,32 @@ else
 
         @if (!string.IsNullOrEmpty(Model.CurrentReport?.ReportUrl))
         {
-            <!-- Affichage dynamique du rapport externe Power BI via IFrame -->
-            <div class="pbi-iframe-wrapper" style="width: 100%; height: calc(100% - 36px); background-color: #FFFFFF;">
+            <!-- Affichage dynamique du rapport externe Power BI via IFrame avec Fallback Erreur SOCADEL -->
+            <div class="pbi-iframe-wrapper" id="pbiIframeWrapper" style="width: 100%; height: calc(100% - 36px); background-color: #FFFFFF; position: relative;">
                 <iframe src="@Model.CurrentReport.ReportUrl" 
                         title="@Model.CurrentReport.Title"
                         width="100%" 
                         height="100%" 
                         frameborder="0" 
                         allowFullScreen="true"
-                        style="border: none; display: block;">
+                        style="border: none; display: block;"
+                        id="reportIframe"
+                        onerror="showSocadelReportError()">
                 </iframe>
+                <div id="customIframeErrorState" class="error-screen-container" style="display: none; position: absolute; inset: 0; background: #FFFFFF; z-index: 10;">
+                    <div class="error-warning-icon" aria-hidden="true">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#E58A2B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <h2 class="error-main-title">Impossible de charger le rapport.</h2>
+                    <p class="error-sub-title">Veuillez réessayer.</p>
+                    <button type="button" class="btn-retry-action" onclick="window.location.reload()">
+                        Réessayer
+                    </button>
+                </div>
             </div>
         }
         else

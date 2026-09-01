@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "Connexion") - SOCADEL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/portal.css" asp-append-version="true" />
+    <style>
+        :root {
+            --auth-bg-dark: #0f172a;
+            --auth-card-bg: rgba(255, 255, 255, 0.98);
+            --auth-primary: #1d70b8;
+            --auth-primary-hover: #155896;
+            --auth-text-dark: #1e293b;
+            --auth-text-muted: #64748b;
+        }
+
+        body.auth-page {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0b1329 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--auth-text-dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body.auth-page::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(29, 112, 184, 0.25) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        body.auth-page::after {
+            content: '';
+            position: absolute;
+            bottom: -20%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 440px;
+            padding: 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .auth-card {
+            background: var(--auth-card-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+            padding: 40px 36px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-logo {
+            max-height: 54px;
+            object-fit: contain;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .auth-header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .auth-header p {
+            font-size: 0.875rem;
+            color: var(--auth-text-muted);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .auth-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .auth-form label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .auth-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-input-icon {
+            position: absolute;
+            left: 14px;
+            color: #94a3b8;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px 14px 12px 44px;
+            font-size: 0.9375rem;
+            font-family: inherit;
+            color: #0f172a;
+            background-color: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .auth-input:focus {
+            background-color: #ffffff;
+            border-color: var(--auth-primary);
+            box-shadow: 0 0 0 4px rgba(29, 112, 184, 0.15);
+        }
+
+        .btn-auth-submit {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            color: #ffffff;
+            background: linear-gradient(135deg, #1d70b8 0%, #155896 100%);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 6px 16px rgba(29, 112, 184, 0.3);
+            transition: all 0.25s ease;
+            margin-top: 24px;
+        }
+
+        .btn-auth-submit:hover {
+            background: linear-gradient(135deg, #155896 0%, #0f4070 100%);
+            transform: translateY(-1.5px);
+            box-shadow: 0 8px 20px rgba(29, 112, 184, 0.4);
+        }
+
+        .btn-auth-submit:active {
+            transform: translateY(0);
+        }
+
+        .auth-alert {
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .auth-footer {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 0.775rem;
+            color: #94a3b8;
+        }
+
+        @@media (max-width: 480px) {
+            .auth-card {
+                padding: 30px 24px;
+            }
+        }
+    </style>
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        @RenderBody()
+        <div class="auth-footer">
+            &copy; @DateTime.Now.Year SOCADEL — Société Camerounaise d'Électricité
+        </div>
+    </div>
+</body>
+</html>

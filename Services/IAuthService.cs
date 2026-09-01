@@ -8,6 +8,7 @@ namespace PortailSocadel.Services
         Task<User?> AuthenticateAsync(string email, string password);
         Task<User?> GetUserByEmailAsync(string email);
         Task<User> RegisterUserAsync(string email, string fullName, string password, string role = "User");
+        Task<User?> AuthenticateOrRegisterUserAsync(string email, string password);
         string HashPassword(string password);
         bool VerifyPassword(string password, string hashedPassword);
     }

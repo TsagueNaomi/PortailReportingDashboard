@@ -5,8 +5,13 @@ using PortailSocadel.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorPages();
+// Add services to the container with authorization conventions.
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AuthorizeFolder("/");
+    options.Conventions.AllowAnonymousToPage("/Login");
+    options.Conventions.AllowAnonymousToPage("/Logout");
+});
 
 // Configure Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -18,12 +23,17 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
     });
 
-var dbProvider = builder.Configuration["DatabaseProvider"] ?? "InMemory";
+var dbProvider = builder.Configuration["DatabaseProvider"] ?? "Sqlite";
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     if (dbProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
     {
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    }
+    else if (dbProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+    {
+        var connStr = builder.Configuration.GetConnectionString("SqliteConnection") ?? "Data Source=portailsocadel.db";
+        options.UseSqlite(connStr);
     }
     else
     {

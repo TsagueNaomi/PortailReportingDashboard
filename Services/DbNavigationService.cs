@@ -123,6 +123,7 @@ namespace PortailSocadel.Services
             
             _context.MenuItems.Add(item);
             _context.SaveChanges();
+            DbSeeder.SaveData(_context);
         }
 
         public bool UpdateItem(MenuItem item)
@@ -143,6 +144,7 @@ namespace PortailSocadel.Services
             existing.UpdatedAt = DateTime.UtcNow;
             
             _context.SaveChanges();
+            DbSeeder.SaveData(_context);
             return true;
         }
 
@@ -157,6 +159,7 @@ namespace PortailSocadel.Services
             var itemsToDelete = _context.MenuItems.Where(i => toDelete.Contains(i.Id)).ToList();
             _context.MenuItems.RemoveRange(itemsToDelete);
             _context.SaveChanges();
+            DbSeeder.SaveData(_context);
             return true;
         }
 
@@ -207,9 +210,16 @@ namespace PortailSocadel.Services
 
         public void ResetToDefault()
         {
-            // Initial data population will be handled by migrations or a seeder,
-            // so we don't necessarily need to implement this here for DB, or we can truncate and re-seed.
-            // For now, doing nothing.
+            var dataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "portailsocadel_store.json");
+            if (File.Exists(dataFilePath))
+            {
+                try
+                {
+                    File.Delete(dataFilePath);
+                }
+                catch { }
+            }
+            DbSeeder.ReSeedDefaults(_context);
         }
     }
 }

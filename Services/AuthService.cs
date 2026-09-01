@@ -32,6 +32,51 @@ namespace PortailSocadel.Services
             return user;
         }
 
+        public async Task<User?> AuthenticateOrRegisterUserAsync(string email, string password)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+                return null;
+
+            var cleanEmail = email.Trim().ToLower();
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == cleanEmail);
+
+            if (existingUser != null)
+            {
+                if (!VerifyPassword(password, existingUser.PasswordHash))
+                    return null;
+
+                return existingUser;
+            }
+
+            // Automatiquement inscrire le nouvel utilisateur en base de données avec le rôle "User"
+            string derivedName = cleanEmail.Split('@')[0];
+            if (derivedName.Contains('.'))
+            {
+                var parts = derivedName.Split('.');
+                derivedName = string.Join(" ", parts.Select(p => p.Length > 0 ? char.ToUpper(p[0]) + p[1..] : p));
+            }
+            else if (derivedName.Length > 0)
+            {
+                derivedName = char.ToUpper(derivedName[0]) + derivedName[1..];
+            }
+
+            var newUser = new User
+            {
+                Id = Guid.NewGuid().ToString("N")[..8],
+                Email = cleanEmail,
+                FullName = derivedName,
+                PasswordHash = HashPassword(password),
+                Role = "User",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+            DbSeeder.SaveData(_context);
+            return newUser;
+        }
+
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -59,6 +104,7 @@ namespace PortailSocadel.Services
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+            DbSeeder.SaveData(_context);
             return user;
         }
 

@@ -160,26 +160,29 @@
                 </ul>
             </nav>
 
-            <!-- 1.4 Dedicated Back-Office Administration Box (Visible only when in Admin Role) -->
-            <div class="sidebar-admin-box">
-                <a href="/Admin" class="sidebar-admin-card @(isAdmin ? "active" : "")" title="Console d'Administration & Back-Office">
-                    <div class="sidebar-admin-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                        </svg>
-                    </div>
-                    <div class="sidebar-admin-text">
-                        <div class="sidebar-admin-title">Administration</div>
-                        <div class="sidebar-admin-subtitle">Gestion des menus & rapports</div>
-                    </div>
-                    <span class="sidebar-admin-arrow">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </span>
-                </a>
-            </div>
+            <!-- 1.4 Dedicated Back-Office Administration Box (Visible ONLY when in Admin Role) -->
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="sidebar-admin-box">
+                    <a href="/Admin" class="sidebar-admin-card @(isAdmin ? "active" : "")" title="Console d'Administration & Back-Office">
+                        <div class="sidebar-admin-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                        </div>
+                        <div class="sidebar-admin-text">
+                            <div class="sidebar-admin-title">Administration</div>
+                            <div class="sidebar-admin-subtitle">Gestion des menus & rapports</div>
+                        </div>
+                        <span class="sidebar-admin-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                    </a>
+                </div>
+            }
         </aside>
 
         <!-- =================================================================
@@ -247,9 +250,6 @@
                         <!-- User Profile Badge -->
                         <div class="header-user-badge d-flex align-items-center gap-2">
                             <span class="user-single-name">@User.Identity.Name</span>
-                            <span class="badge @(User.IsInRole("Admin") ? "bg-danger" : "bg-primary")" style="font-size: 0.7rem; padding: 3px 7px;">
-                                @(User.IsInRole("Admin") ? "Admin" : "User")
-                            </span>
                         </div>
 
                         <a href="/Logout" class="header-logout-btn text-decoration-none" title="Se déconnecter de la session">
@@ -366,44 +366,6 @@
                 @RenderBody()
             </section>
         </main>
-    </div>
-
-    <!-- MODAL OVERLAY: Formulaire de Connexion Obligatoire au Démarrage -->
-    <div class="modal-overlay login-overlay" id="modalAppLogin" style="display: flex;">
-        <div class="modal-dialog login-modal-dialog">
-            <div class="login-card-header">
-                <img src="/images/logo-socadel.jpg" alt="SOCADEL Logo" class="login-logo-img" />
-                <h2>Portail Décisionnel SOCADEL</h2>
-                <p>Portail de reporting &amp; dashboard - Veuillez vous connecter avec vos identifiants d'accès</p>
-            </div>
-
-            <!-- Formulaire de Connexion -->
-            <form id="formAppLogin" onsubmit="handleLoginSubmit(event)">
-                <div class="login-modal-body">
-                    <div id="loginAlert" class="login-alert" style="display: none;"></div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="loginEmail">Adresse e-mail *</label>
-                        <input type="email" id="loginEmail" class="form-control login-input" placeholder="ex: user@socadel.cm" required />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="loginPassword">Mot de passe *</label>
-                        <input type="password" id="loginPassword" class="form-control login-input" placeholder="••••••••" required />
-                    </div>
-                </div>
-
-                <div class="login-modal-footer">
-                    <button type="submit" class="btn-login-submit">
-                        <span>Se connecter</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                            <polyline points="12 5 19 12 12 19"></polyline>
-                        </svg>
-                    </button>
-                </div>
-            </form>
-        </div>
     </div>
 
     <!-- Master Scripts -->

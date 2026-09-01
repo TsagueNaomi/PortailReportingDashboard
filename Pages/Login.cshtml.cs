@@ -57,11 +57,11 @@ namespace PortailSocadel.Pages
                 return Page();
             }
 
-            var user = await _authService.AuthenticateAsync(Input.Email, Input.Password);
+            var user = await _authService.AuthenticateOrRegisterUserAsync(Input.Email, Input.Password);
 
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "Email ou mot de passe incorrect.");
+                ModelState.AddModelError(string.Empty, "Identifiants invalides ou mot de passe incorrect.");
                 return Page();
             }
 

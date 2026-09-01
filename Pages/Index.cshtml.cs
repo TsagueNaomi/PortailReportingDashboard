@@ -80,14 +80,9 @@ namespace PortailSocadel.Pages
                 .Where(i => i.Type == ItemType.Report && i.IsActive)
                 .ToList();
 
-            // Randomly select between 8 and 12 reports (or all if total < 8)
-            Random random = new Random();
-            int targetCount = Math.Min(allReports.Count, Math.Max(8, random.Next(8, 13)));
-            
+            // Select top 3 featured reports to fit on single screen without scrolling
             FeaturedReports = allReports
-                .OrderBy(x => random.Next())
-                .Take(targetCount)
-                .OrderBy(r => r.Title)
+                .Take(3)
                 .ToList();
         }
     }

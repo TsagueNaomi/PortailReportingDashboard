@@ -67,3 +67,8 @@ Thumbs.db
 .cache/
 cli_linux_x64.tar.gz
 *.deb
+cookies.txt
+run.log
+*.db
+*.db-shm
+*.db-wal

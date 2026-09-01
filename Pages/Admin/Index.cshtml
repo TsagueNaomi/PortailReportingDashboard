@@ -18,7 +18,7 @@
                 <span>SOCADEL Back-Office &bull; Gestion du Portail Décisionnel</span>
             </div>
             <h2>Console d'Administration de l'Arborescence &amp; des Rapports</h2>
-            <p>Gestion des menus, sous-menus et liens de rapports décisionnels Power BI</p>
+            <p>Gestion des menus, sous-menus et liens de rapports décisionnels Power BI &amp; SSRS</p>
         </div>
         <div class="admin-header-actions">
             @if (Model.IsStatsView)
@@ -35,27 +35,15 @@
             }
             else
             {
-                <a href="/Admin?view=stats" class="btn-admin-view-toggle" title="Voir la vue statistiques avec les 3 cartes">
+                <a href="/Admin?view=stats" class="btn-admin-view-toggle" title="Voir la vue statistiques">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="20" x2="18" y2="10"></line>
                         <line x1="12" y1="20" x2="12" y2="4"></line>
                         <line x1="6" y1="20" x2="6" y2="14"></line>
                     </svg>
-                    <span>Statistiques &amp; Métriques (3 Cartes)</span>
+                    <span>Statistiques &amp; Métriques</span>
                 </a>
             }
-
-            <form method="post" asp-page-handler="Reset" style="display:inline;" onsubmit="return confirm('Attention : Êtes-vous sûr de vouloir réinitialiser l\'ensemble de l\'arborescence aux données par défaut de SOCADEL ?');">
-                <button type="submit" class="btn-admin-reset" title="Réinitialiser l'arborescence par défaut">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
-                        <path d="M21 3v5h-5"></path>
-                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
-                        <path d="M8 16H3v5"></path>
-                    </svg>
-                    <span>Réinitialiser</span>
-                </button>
-            </form>
         </div>
     </div>
 
@@ -92,10 +80,11 @@
         <!-- Stat KPI Cards Page View -->
         <div class="admin-stats-page-wrapper">
             <div class="admin-stats-header-bar">
-                <h3>Tableau des Statistiques d'Arborescence</h3>
+                <h3>Tableau des Statistiques d'Arborescence &amp; Sources de Rapports</h3>
                 <a href="/Admin" class="btn-admin-back-link">&larr; Retour à la Console Datatable</a>
             </div>
-            <div class="admin-stats-grid">
+            <div class="admin-stats-grid-three">
+                <!-- Card 1: Menus Principaux -->
                 <div class="admin-stat-card card-blue">
                     <div class="admin-stat-top">
                         <div class="admin-stat-info">
@@ -114,6 +103,7 @@
                     </div>
                 </div>
 
+                <!-- Card 2: Sous-menus -->
                 <div class="admin-stat-card card-green">
                     <div class="admin-stat-top">
                         <div class="admin-stat-info">
@@ -134,10 +124,11 @@
                     </div>
                 </div>
 
+                <!-- Card 3: Nombre Total de Rapports (Distinction Power BI / SSRS / Total) -->
                 <div class="admin-stat-card card-purple">
                     <div class="admin-stat-top">
                         <div class="admin-stat-info">
-                            <span class="admin-stat-label">Rapports Intégrés</span>
+                            <span class="admin-stat-label">Nombre Total de Rapports</span>
                             <span class="admin-stat-val">@Model.TotalReports</span>
                         </div>
                         <div class="admin-stat-icon-wrapper icon-purple">
@@ -148,8 +139,21 @@
                             </svg>
                         </div>
                     </div>
+                    <div class="admin-stat-breakdown">
+                        <div class="breakdown-item">
+                            <span class="badge badge-engine-pbi">Power BI</span>
+                            <strong>@Model.TotalPowerBI</strong> rapports
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="badge badge-engine-ssrs">SSRS</span>
+                            <strong>@Model.TotalSSRS</strong> rapports
+                        </div>
+                        <div class="breakdown-item total">
+                            <span>Somme Totale :</span>
+                            <strong>@Model.TotalReports</strong> rapports
+                        </div>
+                    </div>
                     <div class="admin-stat-footer">
-                        <span class="stat-badge">Rapport &bull; Power BI / SSRS</span>
                         <button type="button" class="btn-card-quick-add" onclick="openAddModalWithLevel('3')">+ Ajouter Rapport</button>
                     </div>
                 </div>
@@ -165,7 +169,7 @@
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" id="adminTableSearch" class="admin-filter-input" placeholder="Rechercher par intitulé, code, lien ou parent..." />
+                <input type="text" id="adminTableSearch" class="admin-filter-input" placeholder="Rechercher par intitulé, lien ou parent..." />
                 <button type="button" id="adminSearchClear" class="admin-search-clear-btn" title="Effacer la recherche" style="display:none;">&times;</button>
             </div>
 
@@ -200,22 +204,22 @@
             </div>
         </div>
 
-        <!-- High Clarity Datatable reproducing exemple_databale.jpg style -->
+        <!-- High Clarity Datatable -->
         <div class="admin-table-container">
             <table class="admin-table exemple-datatable-grid" id="adminHierarchyTable">
                 <thead>
                     <tr>
-                        <th style="width: 13%;">Type / Structure</th>
-                        <th style="width: 29%;">Intitulé &amp; Code</th>
-                        <th style="width: 16%;">Parent Hiérarchique</th>
+                        <th style="width: 14%;">Type / Structure</th>
+                        <th style="width: 28%;">Intitulé &amp; Source</th>
+                        <th style="width: 18%;">Parent Hiérarchique</th>
                         <th style="width: 26%;">Lien / URL du Rapport</th>
-                        <th style="width: 16%; text-align: center;">Actions</th>
+                        <th style="width: 14%; text-align: center;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var cat in Model.TreeItems)
                     {
-                        <tr data-title="@cat.Title @cat.Description @cat.Code" data-level="1">
+                        <tr data-title="@cat.Title" data-level="1">
                             <td>
                                 <span class="badge badge-level-1">Menu Principal</span>
                             </td>
@@ -228,10 +232,6 @@
                                     </span>
                                     <div class="node-text-group">
                                         <strong class="node-title">@cat.Title</strong>
-                                        @if (!string.IsNullOrEmpty(cat.Code))
-                                        {
-                                            <span class="badge-code">@cat.Code</span>
-                                        }
                                     </div>
                                 </div>
                             </td>
@@ -239,7 +239,7 @@
                             <td><span class="text-muted-dash">&mdash;</span></td>
                             <td style="text-align: center; white-space: nowrap;">
                                 <div class="table-action-btns-grid">
-                                    <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@cat.Id', '@cat.Title', '', '1', '@(cat.Description ?? "")', '@(cat.ReportUrl ?? "")')" title="Modifier ce menu">
+                                    <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@cat.Id', '@cat.Title', '', '1', '@(cat.ReportUrl ?? "")', 'PowerBI')" title="Modifier ce menu">
                                         Modifier
                                     </button>
                                     <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le menu « @cat.Title » et tous ses sous-menus et rapports associés ?');">
@@ -254,7 +254,7 @@
 
                         @foreach (var sub in cat.Children)
                         {
-                            <tr data-title="@sub.Title @sub.Description @sub.Code @cat.Title" data-level="2">
+                            <tr data-title="@sub.Title @cat.Title" data-level="2">
                                 <td>
                                     <span class="badge badge-level-2">Sous-menu</span>
                                 </td>
@@ -269,10 +269,6 @@
                                         </span>
                                         <div class="node-text-group">
                                             <strong class="node-title">@sub.Title</strong>
-                                            @if (!string.IsNullOrEmpty(sub.Code))
-                                            {
-                                                <span class="badge-code">@sub.Code</span>
-                                            }
                                         </div>
                                     </div>
                                 </td>
@@ -287,7 +283,7 @@
                                 <td><span class="text-muted-dash">&mdash;</span></td>
                                 <td style="text-align: center; white-space: nowrap;">
                                     <div class="table-action-btns-grid">
-                                        <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@sub.Id', '@sub.Title', '@cat.Id', '2', '@(sub.Description ?? "")', '@(sub.ReportUrl ?? "")')" title="Modifier ce sous-menu">
+                                        <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@sub.Id', '@sub.Title', '@cat.Id', '2', '@(sub.ReportUrl ?? "")', 'PowerBI')" title="Modifier ce sous-menu">
                                             Modifier
                                         </button>
                                         <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le sous-menu « @sub.Title » et tous ses rapports ?');">
@@ -302,7 +298,7 @@
 
                             @foreach (var report in sub.Children)
                             {
-                                <tr data-title="@report.Title @report.Description @report.ReportUrl @report.Code @sub.Title @cat.Title" data-level="3">
+                                <tr data-title="@report.Title @report.ReportUrl @sub.Title @cat.Title" data-level="3">
                                     <td>
                                         <span class="badge badge-level-3">Rapport</span>
                                     </td>
@@ -319,9 +315,13 @@
                                                 <a href="/?report=@report.Id" class="node-report-link" title="Consulter le rapport dans le portail">
                                                     @report.Title
                                                 </a>
-                                                @if (!string.IsNullOrEmpty(report.Code))
+                                                @if (report.Engine == ReportEngine.SSRS)
                                                 {
-                                                    <span class="badge-code">@report.Code</span>
+                                                    <span class="badge badge-engine-ssrs">SSRS</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-engine-pbi">Power BI</span>
                                                 }
                                             </div>
                                         </div>
@@ -349,13 +349,13 @@
                                             }
                                             else
                                             {
-                                                <span class="text-muted-dash">https://app.powerbi.com/view?r=socadel...</span>
+                                                <span class="text-muted-dash">https://app.powerbi.com/view?r=...</span>
                                             }
                                         </div>
                                     </td>
                                     <td style="text-align: center; white-space: nowrap;">
                                         <div class="table-action-btns-grid">
-                                            <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@report.Id', '@report.Title', '@sub.Id', '3', '@(report.Description ?? "")', '@(report.ReportUrl ?? "")')" title="Modifier ce rapport">
+                                            <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@report.Id', '@report.Title', '@sub.Id', '3', '@(report.ReportUrl ?? "")', '@report.Engine.ToString()')" title="Modifier ce rapport">
                                                 Modifier
                                             </button>
                                             <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le rapport « @report.Title » ?');">
@@ -398,7 +398,7 @@
 </div>
 
 <!-- =========================================================================
-     MODAL: AJOUTER UN NOUVEL ÉLÉMENT (Nouveau Menu, Sous-menu ou Rapport)
+     MODAL: AJOUTER UN NOUVEL ÉLÉMENT (Menu, Sous-menu ou Rapport)
      ========================================================================= -->
 <div class="modal-overlay" id="modalAddItem">
     <div class="modal-dialog">
@@ -441,15 +441,18 @@
                     <input type="text" id="addItemTitle" name="ItemInput.Title" class="form-control" placeholder="Ex: Direction Technique, Maintenance, Rapport Power BI..." required />
                 </div>
 
-                <div class="form-group" id="addGroupReportUrl">
-                    <label class="form-label" for="addItemReportUrl">Lien du rapport (Power BI / SSRS / Web) *</label>
-                    <input type="url" id="addItemReportUrl" name="ItemInput.ReportUrl" class="form-control" placeholder="https://app.powerbi.com/view?r=eyJrIjoi..." />
-                    <span class="form-help-text">Insérez ici l'URL d'intégration Web Microsoft Power BI ou SSRS.</span>
+                <div class="form-group" id="addGroupEngine">
+                    <label class="form-label" for="addItemEngine">Source / Moteur du rapport *</label>
+                    <select id="addItemEngine" name="ItemInput.Engine" class="form-control">
+                        <option value="PowerBI" selected>Microsoft Power BI (Public / Web)</option>
+                        <option value="SSRS">SQL Server Reporting Services (SSRS)</option>
+                    </select>
                 </div>
 
-                <div class="form-group" id="addGroupDescription">
-                    <label class="form-label" for="addItemDescription">Description du menu</label>
-                    <textarea id="addItemDescription" name="ItemInput.Description" class="form-control form-control-textarea" placeholder="Description synthétique..."></textarea>
+                <div class="form-group" id="addGroupReportUrl">
+                    <label class="form-label" for="addItemReportUrl">Lien / URL publique du rapport *</label>
+                    <input type="url" id="addItemReportUrl" name="ItemInput.ReportUrl" class="form-control" placeholder="https://app.powerbi.com/view?r=..." />
+                    <span class="form-help-text">Insérez le lien d'intégration Power BI public ou l'URL SSRS du rapport.</span>
                 </div>
             </div>
             <div class="modal-footer">
@@ -505,15 +508,18 @@
                     <input type="text" id="editItemTitle" name="ItemInput.Title" class="form-control" required />
                 </div>
 
-                <div class="form-group" id="editGroupReportUrl">
-                    <label class="form-label" for="editItemReportUrl">Lien du rapport (Microsoft Power BI) *</label>
-                    <input type="url" id="editItemReportUrl" name="ItemInput.ReportUrl" class="form-control" placeholder="https://app.powerbi.com/view?r=..." />
-                    <span class="form-help-text">Lien d'intégration directe Power BI.</span>
+                <div class="form-group" id="editGroupEngine">
+                    <label class="form-label" for="editItemEngine">Source / Moteur du rapport *</label>
+                    <select id="editItemEngine" name="ItemInput.Engine" class="form-control">
+                        <option value="PowerBI">Microsoft Power BI (Public / Web)</option>
+                        <option value="SSRS">SQL Server Reporting Services (SSRS)</option>
+                    </select>
                 </div>
 
-                <div class="form-group" id="editGroupDescription">
-                    <label class="form-label" for="editItemDescription">Description du menu</label>
-                    <textarea id="editItemDescription" name="ItemInput.Description" class="form-control form-control-textarea"></textarea>
+                <div class="form-group" id="editGroupReportUrl">
+                    <label class="form-label" for="editItemReportUrl">Lien / URL publique du rapport *</label>
+                    <input type="url" id="editItemReportUrl" name="ItemInput.ReportUrl" class="form-control" placeholder="https://app.powerbi.com/view?r=..." />
+                    <span class="form-help-text">Lien d'intégration Power BI ou SSRS.</span>
                 </div>
             </div>
             <div class="modal-footer">
@@ -532,7 +538,7 @@
             const optSub = document.getElementById('optgroupSubCategories');
             const optCat = document.getElementById('optgroupCategories');
             const reportUrlGroup = document.getElementById('addGroupReportUrl');
-            const descGroup = document.getElementById('addGroupDescription');
+            const engineGroup = document.getElementById('addGroupEngine');
             const modalTitle = document.getElementById('addModalTitle');
 
             if (!typeInput) return;
@@ -541,21 +547,21 @@
                 if (modalTitle) modalTitle.textContent = "Ajouter un Menu Principal";
                 if (parentGroup) parentGroup.style.display = 'none';
                 if (reportUrlGroup) reportUrlGroup.style.display = 'none';
-                if (descGroup) descGroup.style.display = 'block';
+                if (engineGroup) engineGroup.style.display = 'none';
             } else if (typeInput.value === '2') {
-                if (modalTitle) modalTitle.textContent = "Ajouter un Sous-menu (ou Sous-sous-menu)";
+                if (modalTitle) modalTitle.textContent = "Ajouter un Sous-menu";
                 if (parentGroup) parentGroup.style.display = 'block';
                 if (optCat) optCat.style.display = '';
                 if (optSub) optSub.style.display = '';
                 if (reportUrlGroup) reportUrlGroup.style.display = 'none';
-                if (descGroup) descGroup.style.display = 'block';
+                if (engineGroup) engineGroup.style.display = 'none';
             } else {
                 if (modalTitle) modalTitle.textContent = "Ajouter un Rapport";
                 if (parentGroup) parentGroup.style.display = 'block';
                 if (optCat) optCat.style.display = '';
                 if (optSub) optSub.style.display = '';
                 if (reportUrlGroup) reportUrlGroup.style.display = 'block';
-                if (descGroup) descGroup.style.display = 'none';
+                if (engineGroup) engineGroup.style.display = 'block';
             }
         }
 
@@ -565,7 +571,7 @@
             const optSub = document.getElementById('editOptgroupSub');
             const optCat = document.getElementById('editOptgroupCat');
             const reportUrlGroup = document.getElementById('editGroupReportUrl');
-            const descGroup = document.getElementById('editGroupDescription');
+            const engineGroup = document.getElementById('editGroupEngine');
             const modalTitle = document.getElementById('editModalTitle');
 
             if (!typeInput) return;
@@ -574,21 +580,21 @@
                 if (modalTitle) modalTitle.textContent = "Modifier le Menu Principal";
                 if (parentGroup) parentGroup.style.display = 'none';
                 if (reportUrlGroup) reportUrlGroup.style.display = 'none';
-                if (descGroup) descGroup.style.display = 'block';
+                if (engineGroup) engineGroup.style.display = 'none';
             } else if (typeInput.value === '2') {
                 if (modalTitle) modalTitle.textContent = "Modifier le Sous-menu";
                 if (parentGroup) parentGroup.style.display = 'block';
                 if (optCat) optCat.style.display = '';
                 if (optSub) optSub.style.display = '';
                 if (reportUrlGroup) reportUrlGroup.style.display = 'none';
-                if (descGroup) descGroup.style.display = 'block';
+                if (engineGroup) engineGroup.style.display = 'none';
             } else {
                 if (modalTitle) modalTitle.textContent = "Modifier le Rapport";
                 if (parentGroup) parentGroup.style.display = 'block';
                 if (optCat) optCat.style.display = '';
                 if (optSub) optSub.style.display = '';
                 if (reportUrlGroup) reportUrlGroup.style.display = 'block';
-                if (descGroup) descGroup.style.display = 'none';
+                if (engineGroup) engineGroup.style.display = 'block';
             }
         }
 
@@ -596,17 +602,17 @@
             document.getElementById('addItemType').value = level;
             document.getElementById('addItemTitle').value = '';
             document.getElementById('addItemReportUrl').value = '';
-            document.getElementById('addItemDescription').value = '';
+            document.getElementById('addItemEngine').value = 'PowerBI';
             toggleAddFields();
             openAdminModal('modalAddItem');
         };
 
-        window.openEditModal = function(id, title, parentId, type, description, reportUrl) {
+        window.openEditModal = function(id, title, parentId, type, reportUrl, engine) {
             document.getElementById('editItemId').value = id || '';
             document.getElementById('editItemTitle').value = title || '';
             document.getElementById('editItemType').value = type || '3';
             document.getElementById('editItemReportUrl').value = reportUrl || '';
-            document.getElementById('editItemDescription').value = description || '';
+            document.getElementById('editItemEngine').value = engine || 'PowerBI';
             
             toggleEditFields();
             document.getElementById('editItemParentId').value = parentId || '';
