@@ -204,6 +204,123 @@
             </div>
         </div>
 
+@inject INavigationService _navService
+@using PortailSocadel.Models
+@using PortailSocadel.Services
+
+@functions {
+    public static Microsoft.AspNetCore.Html.IHtmlContent RenderAdminTableRows(List<MenuItem> items, int depth, INavigationService navService)
+    {
+        if (items == null) return new Microsoft.AspNetCore.Html.HtmlString("");
+        var sb = new System.Text.StringBuilder();
+
+        foreach (var item in items)
+        {
+            var isCategory = item.Type == ItemType.Category;
+            var isSubCategory = item.Type == ItemType.SubCategory;
+            var isReport = item.Type == ItemType.Report;
+
+            var parentNode = !string.IsNullOrEmpty(item.ParentId) ? navService.GetItemById(item.ParentId) : null;
+            var parentTitle = parentNode?.Title ?? "";
+
+            var indentPx = depth * 24;
+
+            sb.Append($"<tr data-title=\"{System.Net.WebUtility.HtmlEncode(item.Title)} {System.Net.WebUtility.HtmlEncode(parentTitle)}\" data-level=\"{depth + 1}\">");
+
+            sb.Append("<td>");
+            if (isCategory)
+            {
+                sb.Append("<span class=\"badge badge-level-1\">Menu</span>");
+            }
+            else if (isSubCategory)
+            {
+                sb.Append("<span class=\"badge badge-level-2\">Sous-menu</span>");
+            }
+            else
+            {
+                sb.Append("<span class=\"badge badge-level-3\">Rapport</span>");
+            }
+            sb.Append("</td>");
+
+            sb.Append("<td>");
+            sb.Append($"<div class=\"tree-node-cell\" style=\"padding-left: {indentPx}px;\">");
+            if (isCategory)
+            {
+                sb.Append("<span class=\"table-node-icon cat-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z\"></path></svg></span>");
+                sb.Append($"<div class=\"node-text-group\"><strong class=\"node-title\">{System.Net.WebUtility.HtmlEncode(item.Title)}</strong></div>");
+            }
+            else if (isSubCategory)
+            {
+                sb.Append("<span class=\"table-node-icon sub-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z\"></path><line x1=\"12\" y1=\"11\" x2=\"12\" y2=\"17\"></line><line x1=\"9\" y1=\"14\" x2=\"15\" y2=\"14\"></line></svg></span>");
+                sb.Append($"<div class=\"node-text-group\"><strong class=\"node-title\">{System.Net.WebUtility.HtmlEncode(item.Title)}</strong></div>");
+            }
+            else
+            {
+                sb.Append("<span class=\"table-node-icon report-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"3\" y1=\"9\" x2=\"21\" y2=\"9\"></line><line x1=\"9\" y1=\"21\" x2=\"9\" y2=\"9\"></line></svg></span>");
+                sb.Append($"<div class=\"node-text-group\"><a href=\"/?report={item.Id}\" class=\"node-report-link\" title=\"Consulter le rapport dans le portail\">{System.Net.WebUtility.HtmlEncode(item.Title)}</a>");
+                if (item.Engine == ReportEngine.SSRS)
+                {
+                    sb.Append(" <span class=\"badge badge-engine-ssrs\">SSRS</span>");
+                }
+                else
+                {
+                    sb.Append(" <span class=\"badge badge-engine-pbi\">Power BI</span>");
+                }
+                sb.Append("</div>");
+            }
+            sb.Append("</div>");
+            sb.Append("</td>");
+
+            sb.Append("<td>");
+            if (!string.IsNullOrEmpty(parentTitle))
+            {
+                var colorClass = isReport ? "green" : "blue";
+                sb.Append($"<span class=\"parent-reference {colorClass}\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z\"></path></svg> {System.Net.WebUtility.HtmlEncode(parentTitle)}</span>");
+            }
+            else
+            {
+                sb.Append("<span class=\"text-muted-dash\">&mdash;</span>");
+            }
+            sb.Append("</td>");
+
+            sb.Append("<td>");
+            if (isReport && !string.IsNullOrEmpty(item.ReportUrl))
+            {
+                sb.Append($"<div class=\"report-url-cell\"><a href=\"{System.Net.WebUtility.HtmlEncode(item.ReportUrl)}\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"report-url-link\" title=\"{System.Net.WebUtility.HtmlEncode(item.ReportUrl)}\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\"></path><polyline points=\"15 3 21 3 21 9\"></polyline><line x1=\"10\" y1=\"14\" x2=\"21\" y2=\"3\"></line></svg><span class=\"report-url-text\">{System.Net.WebUtility.HtmlEncode(item.ReportUrl)}</span></a></div>");
+            }
+            else
+            {
+                sb.Append("<span class=\"text-muted-dash\">&mdash;</span>");
+            }
+            sb.Append("</td>");
+
+            var typeVal = isCategory ? "1" : (isSubCategory ? "2" : "3");
+            var engineVal = item.Engine.ToString();
+            var reportUrlVal = System.Net.WebUtility.HtmlEncode(item.ReportUrl ?? "").Replace("'", "\\'");
+            var itemTitleVal = System.Net.WebUtility.HtmlEncode(item.Title).Replace("'", "\\'");
+            var itemParentVal = item.ParentId ?? "";
+
+            sb.Append("<td style=\"text-align: center; white-space: nowrap;\">");
+            sb.Append("<div class=\"table-action-btns-grid\">");
+            sb.Append($"<button type=\"button\" class=\"btn-grid-action btn-grid-edit\" onclick=\"openEditModal('{item.Id}', '{itemTitleVal}', '{itemParentVal}', '{typeVal}', '{reportUrlVal}', '{engineVal}')\" title=\"Modifier cet élément\">Modifier</button>");
+            sb.Append($"<form method=\"post\" action=\"/Admin?handler=Delete\" style=\"display:inline;\" onsubmit=\"return confirm('Supprimer définitivement l\\'élément « {itemTitleVal} » et tous ses sous-éléments ?');\">");
+            sb.Append($"<input type=\"hidden\" name=\"id\" value=\"{item.Id}\" />");
+            sb.Append("<button type=\"submit\" class=\"btn-grid-action btn-grid-delete\" title=\"Supprimer cet élément\">Supprimer</button>");
+            sb.Append("</form>");
+            sb.Append("</div>");
+            sb.Append("</td>");
+
+            sb.Append("</tr>");
+
+            if (item.Children != null && item.Children.Any())
+            {
+                sb.Append(RenderAdminTableRows(item.Children, depth + 1, navService).ToString());
+            }
+        }
+        return new Microsoft.AspNetCore.Html.HtmlString(sb.ToString());
+    }
+}
+
         <!-- High Clarity Datatable -->
         <div class="admin-table-container">
             <table class="admin-table exemple-datatable-grid" id="adminHierarchyTable">
@@ -217,159 +334,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var cat in Model.TreeItems)
-                    {
-                        <tr data-title="@cat.Title" data-level="1">
-                            <td>
-                                <span class="badge badge-level-1">Menu Principal</span>
-                            </td>
-                            <td>
-                                <div class="tree-node-cell">
-                                    <span class="table-node-icon cat-icon">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                        </svg>
-                                    </span>
-                                    <div class="node-text-group">
-                                        <strong class="node-title">@cat.Title</strong>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="text-muted-dash">&mdash; (Racine)</span></td>
-                            <td><span class="text-muted-dash">&mdash;</span></td>
-                            <td style="text-align: center; white-space: nowrap;">
-                                <div class="table-action-btns-grid">
-                                    <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@cat.Id', '@cat.Title', '', '1', '@(cat.ReportUrl ?? "")', 'PowerBI')" title="Modifier ce menu">
-                                        Modifier
-                                    </button>
-                                    <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le menu « @cat.Title » et tous ses sous-menus et rapports associés ?');">
-                                        <input type="hidden" name="id" value="@cat.Id" />
-                                        <button type="submit" class="btn-grid-action btn-grid-delete" title="Supprimer ce menu">
-                                            Supprimer
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-
-                        @foreach (var sub in cat.Children)
-                        {
-                            <tr data-title="@sub.Title @cat.Title" data-level="2">
-                                <td>
-                                    <span class="badge badge-level-2">Sous-menu</span>
-                                </td>
-                                <td>
-                                    <div class="tree-node-cell level-indent-1">
-                                        <span class="table-node-icon sub-icon">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                                <line x1="12" y1="11" x2="12" y2="17"></line>
-                                                <line x1="9" y1="14" x2="15" y2="14"></line>
-                                            </svg>
-                                        </span>
-                                        <div class="node-text-group">
-                                            <strong class="node-title">@sub.Title</strong>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="parent-reference blue">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                        </svg>
-                                        @cat.Title
-                                    </span>
-                                </td>
-                                <td><span class="text-muted-dash">&mdash;</span></td>
-                                <td style="text-align: center; white-space: nowrap;">
-                                    <div class="table-action-btns-grid">
-                                        <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@sub.Id', '@sub.Title', '@cat.Id', '2', '@(sub.ReportUrl ?? "")', 'PowerBI')" title="Modifier ce sous-menu">
-                                            Modifier
-                                        </button>
-                                        <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le sous-menu « @sub.Title » et tous ses rapports ?');">
-                                            <input type="hidden" name="id" value="@sub.Id" />
-                                            <button type="submit" class="btn-grid-action btn-grid-delete" title="Supprimer ce sous-menu">
-                                                Supprimer
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            @foreach (var report in sub.Children)
-                            {
-                                <tr data-title="@report.Title @report.ReportUrl @sub.Title @cat.Title" data-level="3">
-                                    <td>
-                                        <span class="badge badge-level-3">Rapport</span>
-                                    </td>
-                                    <td>
-                                        <div class="tree-node-cell level-indent-2">
-                                            <span class="table-node-icon report-icon">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                                    <line x1="3" y1="9" x2="21" y2="9"></line>
-                                                    <line x1="9" y1="21" x2="9" y2="9"></line>
-                                                </svg>
-                                            </span>
-                                            <div class="node-text-group">
-                                                <a href="/?report=@report.Id" class="node-report-link" title="Consulter le rapport dans le portail">
-                                                    @report.Title
-                                                </a>
-                                                @if (report.Engine == ReportEngine.SSRS)
-                                                {
-                                                    <span class="badge badge-engine-ssrs">SSRS</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge badge-engine-pbi">Power BI</span>
-                                                }
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="parent-reference green">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                            </svg>
-                                            @sub.Title
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="report-url-cell">
-                                            @if (!string.IsNullOrEmpty(report.ReportUrl))
-                                            {
-                                                <a href="@report.ReportUrl" target="_blank" rel="noopener noreferrer" class="report-url-link" title="@report.ReportUrl">
-                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                                        <polyline points="15 3 21 3 21 9"></polyline>
-                                                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                                                    </svg>
-                                                    <span class="report-url-text">@report.ReportUrl</span>
-                                                </a>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted-dash">https://app.powerbi.com/view?r=...</span>
-                                            }
-                                        </div>
-                                    </td>
-                                    <td style="text-align: center; white-space: nowrap;">
-                                        <div class="table-action-btns-grid">
-                                            <button type="button" class="btn-grid-action btn-grid-edit" onclick="openEditModal('@report.Id', '@report.Title', '@sub.Id', '3', '@(report.ReportUrl ?? "")', '@report.Engine.ToString()')" title="Modifier ce rapport">
-                                                Modifier
-                                            </button>
-                                            <form method="post" asp-page-handler="Delete" style="display:inline;" onsubmit="return confirm('Supprimer définitivement le rapport « @report.Title » ?');">
-                                                <input type="hidden" name="id" value="@report.Id" />
-                                                <button type="submit" class="btn-grid-action btn-grid-delete" title="Supprimer ce rapport">
-                                                    Supprimer
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    }
+                    @RenderAdminTableRows(Model.TreeItems, 0, _navService)
                 </tbody>
             </table>
 
@@ -419,26 +384,16 @@
                 <div class="form-group" id="addGroupParent">
                     <label class="form-label" for="addItemParentId">Élément parent *</label>
                     <select id="addItemParentId" name="ItemInput.ParentId" class="form-control">
-                        <optgroup label="-- Sous-menus disponibles (pour les Rapports) --" id="optgroupSubCategories">
-                            @foreach (var sub in Model.SubCategoryOptions)
-                            {
-                                var parentCat = Model.CategoryOptions.FirstOrDefault(c => c.Id == sub.ParentId);
-                                var label = parentCat != null ? $"{parentCat.Title} > {sub.Title}" : sub.Title;
-                                <option value="@sub.Id">@label</option>
-                            }
-                        </optgroup>
-                        <optgroup label="-- Menus principaux (pour les Sous-Menus) --" id="optgroupCategories">
-                            @foreach (var cat in Model.CategoryOptions)
-                            {
-                                <option value="@cat.Id">@cat.Title</option>
-                            }
-                        </optgroup>
+                        @foreach (var parent in Model.ParentOptions)
+                        {
+                            <option value="@parent.Id">@parent.BreadcrumbPath</option>
+                        }
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="addItemTitle">Intitulé de l'élément *</label>
-                    <input type="text" id="addItemTitle" name="ItemInput.Title" class="form-control" placeholder="Ex: Direction Technique, Maintenance, Rapport Power BI..." required />
+                    <input type="text" id="addItemTitle" name="ItemInput.Title" class="form-control" placeholder="Ex: Encaissement, Synthèses, Rapport..." required />
                 </div>
 
                 <div class="form-group" id="addGroupEngine">
@@ -485,21 +440,11 @@
                 <div class="form-group" id="editGroupParent">
                     <label class="form-label" for="editItemParentId">Élément parent</label>
                     <select id="editItemParentId" name="ItemInput.ParentId" class="form-control">
-                        <option value="">-- Aucun parent (Racine) --</option>
-                        <optgroup label="Menus Principaux" id="editOptgroupCat">
-                            @foreach (var cat in Model.CategoryOptions)
-                            {
-                                <option value="@cat.Id">@cat.Title</option>
-                            }
-                        </optgroup>
-                        <optgroup label="Sous-Menus" id="editOptgroupSub">
-                            @foreach (var sub in Model.SubCategoryOptions)
-                            {
-                                var parentCat = Model.CategoryOptions.FirstOrDefault(c => c.Id == sub.ParentId);
-                                var label = parentCat != null ? $"{parentCat.Title} > {sub.Title}" : sub.Title;
-                                <option value="@sub.Id">@label</option>
-                            }
-                        </optgroup>
+                        <option value="">-- Aucun parent (Menu Racine) --</option>
+                        @foreach (var parent in Model.ParentOptions)
+                        {
+                            <option value="@parent.Id">@parent.BreadcrumbPath</option>
+                        }
                     </select>
                 </div>
 

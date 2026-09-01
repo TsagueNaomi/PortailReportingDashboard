@@ -135,7 +135,7 @@ namespace PortailSocadel.Data
             var items = new List<MenuItem>();
 
             // =============================================================
-            // 1. DIRECTION COMMERCIALE (Level 1)
+            // 1. COMMERCIAL (Menu)
             // =============================================================
             var commercial = new MenuItem
             {
@@ -149,7 +149,7 @@ namespace PortailSocadel.Data
             };
             items.Add(commercial);
 
-            // 1.1 Encaissement
+            // 1.1 Encaissement (Sous-menu)
             var encaissement = new MenuItem
             {
                 Id = "sub-encaissement",
@@ -162,11 +162,26 @@ namespace PortailSocadel.Data
                 UpdatedAt = DateTime.UtcNow
             };
             items.Add(encaissement);
+
+            // 1.1.1 Synthèses (Sous-menu)
+            var syntheses = new MenuItem
+            {
+                Id = "sub-syntheses",
+                Title = "Synthèses",
+                ParentId = encaissement.Id,
+                Type = ItemType.SubCategory,
+                Order = 1,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            items.Add(syntheses);
+
             items.Add(new MenuItem 
             { 
                 Id = "rep-enc-synth", 
                 Title = "Synthèse journalière des encaissements", 
-                ParentId = encaissement.Id, 
+                ParentId = syntheses.Id, 
                 Type = ItemType.Report, 
                 Order = 1, 
                 Engine = ReportEngine.PowerBI, 
@@ -174,11 +189,12 @@ namespace PortailSocadel.Data
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
+
             items.Add(new MenuItem 
             { 
                 Id = "rep-enc-modes", 
                 Title = "Répartition par mode de règlement", 
-                ParentId = encaissement.Id, 
+                ParentId = syntheses.Id, 
                 Type = ItemType.Report, 
                 Order = 2, 
                 Engine = ReportEngine.PowerBI, 
@@ -187,24 +203,39 @@ namespace PortailSocadel.Data
                 UpdatedAt = DateTime.UtcNow
             });
 
-            // 1.1.1 RELEVES (Sous-menu dans Encaissement)
+            // 1.1.2 RELEVES (Sous-menu)
             var releves = new MenuItem
             {
                 Id = "sub-releves",
                 Title = "RELEVES",
                 ParentId = encaissement.Id,
                 Type = ItemType.SubCategory,
-                Order = 3,
+                Order = 2,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
             items.Add(releves);
+
+            // 1.1.2.1 Synthèses Relevés (Sous-menu)
+            var synthesesReleves = new MenuItem
+            {
+                Id = "sub-syntheses-releves",
+                Title = "Synthèses Relevés",
+                ParentId = releves.Id,
+                Type = ItemType.SubCategory,
+                Order = 1,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            items.Add(synthesesReleves);
+
             items.Add(new MenuItem 
             { 
                 Id = "rep-rel-synth", 
                 Title = "Synthèse des relevés d'index", 
-                ParentId = releves.Id, 
+                ParentId = synthesesReleves.Id, 
                 Type = ItemType.Report, 
                 Order = 1, 
                 Engine = ReportEngine.PowerBI, 
@@ -213,7 +244,7 @@ namespace PortailSocadel.Data
                 UpdatedAt = DateTime.UtcNow
             });
 
-            // 1.1.1.1 Relevés Spéciaux (Sous-sous-menu dans RELEVES)
+            // 1.1.2.2 Relevés Spéciaux (Sous-menu)
             var relevesSpeciaux = new MenuItem
             {
                 Id = "sub-releves-speciaux",
@@ -226,10 +257,11 @@ namespace PortailSocadel.Data
                 UpdatedAt = DateTime.UtcNow
             };
             items.Add(relevesSpeciaux);
+
             items.Add(new MenuItem 
             { 
                 Id = "rep-rel-spec-01", 
-                Title = "Suivi des relèves haute tension & industrielles", 
+                Title = "Suivi des relevés haute tension & industrielles", 
                 ParentId = relevesSpeciaux.Id, 
                 Type = ItemType.Report, 
                 Order = 1, 
@@ -239,24 +271,40 @@ namespace PortailSocadel.Data
                 UpdatedAt = DateTime.UtcNow
             });
 
-            // 1.2 Facturation
+            // =============================================================
+            // 2. FACTURATION (Menu)
+            // =============================================================
             var facturation = new MenuItem
             {
-                Id = "sub-facturation",
+                Id = "menu-facturation",
                 Title = "Facturation",
-                ParentId = commercial.Id,
-                Type = ItemType.SubCategory,
+                Type = ItemType.Category,
                 Order = 2,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
             items.Add(facturation);
+
+            // 2.1 Suivis (Sous-menu)
+            var suivis = new MenuItem
+            {
+                Id = "sub-suivis",
+                Title = "Suivis",
+                ParentId = facturation.Id,
+                Type = ItemType.SubCategory,
+                Order = 1,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            items.Add(suivis);
+
             items.Add(new MenuItem 
             { 
                 Id = "rep-fac-mensuel", 
                 Title = "Suivi mensuel de facturation", 
-                ParentId = facturation.Id, 
+                ParentId = suivis.Id, 
                 Type = ItemType.Report, 
                 Order = 1, 
                 Engine = ReportEngine.PowerBI, 
@@ -264,164 +312,11 @@ namespace PortailSocadel.Data
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
+
             items.Add(new MenuItem 
             { 
                 Id = "rep-fac-grands-comptes", 
                 Title = "Portefeuille grands comptes & industriels", 
-                ParentId = facturation.Id, 
-                Type = ItemType.Report, 
-                Order = 2, 
-                Engine = ReportEngine.PowerBI, 
-                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
-
-            // 1.3 Recouvrement
-            var recouvrement = new MenuItem
-            {
-                Id = "sub-recouvrement",
-                Title = "Recouvrement",
-                ParentId = commercial.Id,
-                Type = ItemType.SubCategory,
-                Order = 3,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            items.Add(recouvrement);
-            items.Add(new MenuItem 
-            { 
-                Id = "rep-rec-taux", 
-                Title = "Taux de recouvrement & balance âgée", 
-                ParentId = recouvrement.Id, 
-                Type = ItemType.Report, 
-                Order = 1, 
-                Engine = ReportEngine.PowerBI, 
-                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
-            items.Add(new MenuItem 
-            { 
-                Id = "rep-rec-contentieux", 
-                Title = "Dossiers en contentieux & relances", 
-                ParentId = recouvrement.Id, 
-                Type = ItemType.Report, 
-                Order = 2, 
-                Engine = ReportEngine.PowerBI, 
-                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
-
-            // 1.4 Abonnement
-            var abonnement = new MenuItem
-            {
-                Id = "sub-abonnement",
-                Title = "Abonnement",
-                ParentId = commercial.Id,
-                Type = ItemType.SubCategory,
-                Order = 4,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            items.Add(abonnement);
-            items.Add(new MenuItem 
-            { 
-                Id = "rep-abo-parc", 
-                Title = "Parc abonnés & nouvelles souscriptions", 
-                ParentId = abonnement.Id, 
-                Type = ItemType.Report, 
-                Order = 1, 
-                Engine = ReportEngine.PowerBI, 
-                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
-            items.Add(new MenuItem 
-            { 
-                Id = "rep-abo-resiliations", 
-                Title = "Taux de résiliation & réabonnements", 
-                ParentId = abonnement.Id, 
-                Type = ItemType.Report, 
-                Order = 2, 
-                Engine = ReportEngine.PowerBI, 
-                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
-
-            // 1.5 Suivi des compteurs
-            var compteurs = new MenuItem
-            {
-                Id = "sub-compteurs",
-                Title = "Suivi des compteurs",
-                ParentId = commercial.Id,
-                Type = ItemType.SubCategory,
-                Order = 5,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            items.Add(compteurs);
-            items.Add(new MenuItem 
-            { 
-                Id = "rep-cpt-parc", 
-                Title = "Inventaire du parc compteurs", 
-                ParentId = compteurs.Id, 
-                Type = ItemType.Report, 
-                Order = 1, 
-                Engine = ReportEngine.PowerBI, 
-                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
-            items.Add(new MenuItem 
-            { 
-                Id = "rep-cpt-anomalies", 
-                Title = "Anomalies de relève & compteurs bloqués", 
-                ParentId = compteurs.Id, 
-                Type = ItemType.Report, 
-                Order = 2, 
-                Engine = ReportEngine.PowerBI, 
-                SimulateError = true, 
-                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiM2ZmZGNmMjctZmU3OC00MzdjLTgyN2EtZWMzZWM4NTM1NjYwIiwidCI6IjY5OWFjZTY3LWQyZTQtNGJjZC1iMzAzLWQyYmJlMmI5YmJmMSJ9",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
-
-            // 1.6 Branchement
-            var branchement = new MenuItem
-            {
-                Id = "sub-branchement",
-                Title = "Branchement",
-                ParentId = commercial.Id,
-                Type = ItemType.SubCategory,
-                Order = 6,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            items.Add(branchement);
-            items.Add(new MenuItem 
-            { 
-                Id = "rep-bra-delais", 
-                Title = "Délais d'instruction des raccordements", 
-                ParentId = branchement.Id, 
-                Type = ItemType.Report, 
-                Order = 1, 
-                Engine = ReportEngine.PowerBI, 
-                ReportUrl = "https://app.powerbi.com/view?r=eyJrIjoiMTY5ZTIyN2MtOGVmYy00NTc3LTkzMWMtZmNkMTZiNDc4NWJkIiwidCI6ImZjZTBkOTIyLWMzMjktNGMwMC04MTY3LTZkYzQ4ZTM3ZWEwNSJ9",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
-            items.Add(new MenuItem 
-            { 
-                Id = "rep-bra-travaux", 
-                Title = "Suivi des chantiers & travaux réseau", 
-                ParentId = branchement.Id, 
                 Type = ItemType.Report, 
                 Order = 2, 
                 Engine = ReportEngine.PowerBI, 

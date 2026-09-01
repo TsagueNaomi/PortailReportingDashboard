@@ -21,6 +21,7 @@ namespace PortailSocadel.Pages.Admin
 
         public List<MenuItem> TreeItems { get; set; } = new();
         public List<MenuItem> FlatItems { get; set; } = new();
+        public List<ParentOption> ParentOptions { get; set; } = new();
         public List<MenuItem> CategoryOptions { get; set; } = new();
         public List<MenuItem> SubCategoryOptions { get; set; } = new();
 
@@ -60,6 +61,36 @@ namespace PortailSocadel.Pages.Admin
 
             CategoryOptions = FlatItems.Where(i => i.Type == ItemType.Category).OrderBy(i => i.Order).ToList();
             SubCategoryOptions = FlatItems.Where(i => i.Type == ItemType.SubCategory).OrderBy(i => i.Order).ToList();
+
+            ParentOptions = new List<ParentOption>();
+            foreach (var cat in TreeItems)
+            {
+                ParentOptions.Add(new ParentOption
+                {
+                    Id = cat.Id,
+                    Title = cat.Title,
+                    BreadcrumbPath = cat.Title,
+                    Type = cat.Type
+                });
+                AddChildParentOptions(cat, cat.Title);
+            }
+        }
+
+        private void AddChildParentOptions(MenuItem parent, string currentPath)
+        {
+            if (parent.Children == null) return;
+            foreach (var child in parent.Children.Where(c => c.Type == ItemType.SubCategory))
+            {
+                var childPath = $"{currentPath} > {child.Title}";
+                ParentOptions.Add(new ParentOption
+                {
+                    Id = child.Id,
+                    Title = child.Title,
+                    BreadcrumbPath = childPath,
+                    Type = child.Type
+                });
+                AddChildParentOptions(child, childPath);
+            }
         }
 
         public IActionResult OnPostAdd()
@@ -137,5 +168,13 @@ namespace PortailSocadel.Pages.Admin
             SuccessMessage = "L'arborescence complète a été réinitialisée avec les paramètres d'usine de SOCADEL.";
             return RedirectToPage();
         }
+    }
+
+    public class ParentOption
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string BreadcrumbPath { get; set; } = string.Empty;
+        public ItemType Type { get; set; }
     }
 }
