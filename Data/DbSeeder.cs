@@ -5,7 +5,7 @@ namespace PortailSocadel.Data
 {
     public static class DbSeeder
     {
-        private static readonly string DataFilePath = Path.Combine(Directory.GetCurrentDirectory(), "portailsocadel_store.json");
+        public static readonly string DataFilePath = Path.Combine(Directory.GetCurrentDirectory(), "portailsocadel_store.json");
 
         public class AppDataDto
         {
@@ -37,63 +37,72 @@ namespace PortailSocadel.Data
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+            // Create DB schema if it doesn't exist (SQLite: creates the file; InMemory: no-op)
             try
             {
                 context.Database.EnsureCreated();
             }
-            catch { }
-
-            // 1. Restore Users if missing
-            if (File.Exists(DataFilePath) && !context.Users.Any())
+            catch (Exception ex)
             {
-                try
-                {
-                    var json = File.ReadAllText(DataFilePath);
-                    var dto = System.Text.Json.JsonSerializer.Deserialize<AppDataDto>(json);
-                    if (dto?.Users != null && dto.Users.Any())
-                    {
-                        context.Users.AddRange(dto.Users);
-                        context.SaveChanges();
-                    }
-                }
-                catch { }
+                Console.WriteLine($"[DB INIT ERROR] {ex.Message}");
             }
 
-            // Seed Users if empty
+            // Seed Users only if the table is empty
             if (!context.Users.Any())
             {
-                using var sha256 = System.Security.Cryptography.SHA256.Create();
-                var adminPasswordHash = Convert.ToBase64String(sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes("Admin123!")));
-                var userPasswordHash = Convert.ToBase64String(sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes("User123!")));
-
-                context.Users.AddRange(
-                    new User
+                // Try to restore from JSON backup first (for InMemory fallback)
+                if (File.Exists(DataFilePath))
+                {
+                    try
                     {
-                        Id = "usr-admin-01",
-                        Email = "admin@socadel.cm",
-                        FullName = "Administrateur SOCADEL",
-                        PasswordHash = adminPasswordHash,
-                        Role = "Admin",
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    },
-                    new User
-                    {
-                        Id = "usr-user-01",
-                        Email = "user@socadel.cm",
-                        FullName = "Naomi TSAGUE",
-                        PasswordHash = userPasswordHash,
-                        Role = "User",
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
+                        var json = File.ReadAllText(DataFilePath);
+                        var dto = System.Text.Json.JsonSerializer.Deserialize<AppDataDto>(json);
+                        if (dto?.Users != null && dto.Users.Any())
+                        {
+                            context.Users.AddRange(dto.Users);
+                            context.SaveChanges();
+                        }
                     }
-                );
-                context.SaveChanges();
+                    catch { }
+                }
+
+                // Seed default users if still empty
+                if (!context.Users.Any())
+                {
+                    using var sha256 = System.Security.Cryptography.SHA256.Create();
+                    var adminPasswordHash = Convert.ToBase64String(sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes("Admin123!")));
+                    var userPasswordHash = Convert.ToBase64String(sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes("User123!")));
+
+                    context.Users.AddRange(
+                        new User
+                        {
+                            Id = "usr-admin-01",
+                            Email = "admin@socadel.cm",
+                            FullName = "Administrateur SOCADEL",
+                            PasswordHash = adminPasswordHash,
+                            Role = "Admin",
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        },
+                        new User
+                        {
+                            Id = "usr-user-01",
+                            Email = "user@socadel.cm",
+                            FullName = "Naomi TSAGUE",
+                            PasswordHash = userPasswordHash,
+                            Role = "User",
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        }
+                    );
+                    context.SaveChanges();
+                }
             }
 
-            // Look for any menu items.
+            // Seed menu items only if the table is empty
             if (!context.MenuItems.Any())
             {
+                // Try to restore from JSON backup first (for InMemory fallback)
                 if (File.Exists(DataFilePath))
                 {
                     try
@@ -111,14 +120,10 @@ namespace PortailSocadel.Data
                 }
 
                 SeedMenuItems(context);
-                SaveData(context);
             }
-            else
-            {
-                // Ensure store backup is always up to date
-                SaveData(context);
-            }
+            // For InMemory: keep JSON in sync; for disk DBs (SQLite/SqlServer), skip JSON
         }
+
 
         public static void ReSeedDefaults(AppDbContext context)
         {

@@ -210,7 +210,7 @@ namespace PortailSocadel.Services
 
         public void ResetToDefault()
         {
-            var dataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "portailsocadel_store.json");
+            var dataFilePath = DbSeeder.DataFilePath;
             if (File.Exists(dataFilePath))
             {
                 try

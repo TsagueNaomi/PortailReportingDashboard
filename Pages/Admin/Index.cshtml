@@ -205,11 +205,12 @@
         </div>
 
 @inject INavigationService _navService
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @using PortailSocadel.Models
 @using PortailSocadel.Services
 
 @functions {
-    public static Microsoft.AspNetCore.Html.IHtmlContent RenderAdminTableRows(List<MenuItem> items, int depth, INavigationService navService)
+    public static Microsoft.AspNetCore.Html.IHtmlContent RenderAdminTableRows(List<MenuItem> items, int depth, INavigationService navService, string antiforgeryToken)
     {
         if (items == null) return new Microsoft.AspNetCore.Html.HtmlString("");
         var sb = new System.Text.StringBuilder();
@@ -305,6 +306,7 @@
             sb.Append($"<button type=\"button\" class=\"btn-grid-action btn-grid-edit\" onclick=\"openEditModal('{item.Id}', '{itemTitleVal}', '{itemParentVal}', '{typeVal}', '{reportUrlVal}', '{engineVal}')\" title=\"Modifier cet élément\">Modifier</button>");
             sb.Append($"<form method=\"post\" action=\"/Admin?handler=Delete\" style=\"display:inline;\" onsubmit=\"return confirm('Supprimer définitivement l\\'élément « {itemTitleVal} » et tous ses sous-éléments ?');\">");
             sb.Append($"<input type=\"hidden\" name=\"id\" value=\"{item.Id}\" />");
+            sb.Append($"<input type=\"hidden\" name=\"__RequestVerificationToken\" value=\"{System.Net.WebUtility.HtmlEncode(antiforgeryToken)}\" />");
             sb.Append("<button type=\"submit\" class=\"btn-grid-action btn-grid-delete\" title=\"Supprimer cet élément\">Supprimer</button>");
             sb.Append("</form>");
             sb.Append("</div>");
@@ -314,7 +316,7 @@
 
             if (item.Children != null && item.Children.Any())
             {
-                sb.Append(RenderAdminTableRows(item.Children, depth + 1, navService).ToString());
+                sb.Append(RenderAdminTableRows(item.Children, depth + 1, navService, antiforgeryToken).ToString());
             }
         }
         return new Microsoft.AspNetCore.Html.HtmlString(sb.ToString());
@@ -334,7 +336,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @RenderAdminTableRows(Model.TreeItems, 0, _navService)
+                    @RenderAdminTableRows(Model.TreeItems, 0, _navService, Antiforgery.GetAndStoreTokens(HttpContext).RequestToken!)
                 </tbody>
             </table>
 

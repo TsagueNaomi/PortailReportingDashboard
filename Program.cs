@@ -23,7 +23,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
     });
 
-var dbProvider = builder.Configuration["DatabaseProvider"] ?? "Sqlite";
+var dbProvider = builder.Configuration["DatabaseProvider"] ?? "InMemory";
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     if (dbProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
