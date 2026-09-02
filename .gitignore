@@ -72,3 +72,8 @@ run.log
 *.db
 *.db-shm
 *.db-wal
+
+## Documentation & Presentation Guides (Local only)
+GUIDE_PRESENTATION_TUTEUR.md
+CONVERSATION_HISTORY.md
+
