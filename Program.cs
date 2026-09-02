@@ -13,15 +13,16 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AllowAnonymousToPage("/Logout");
 });
 
-// Configure Authentication
+// Configuration de l'authentification par cookie (Session sécurisée)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Login";
+        options.LoginPath = "/Login"; Redirection automatique si non connecté
         options.LogoutPath = "/Logout";
         options.AccessDeniedPath = "/Login";
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
     });
+// Sélection dynamique du moteur de base de données (SQL Server / InMemory)
 
 var dbProvider = builder.Configuration["DatabaseProvider"] ?? "InMemory";
 builder.Services.AddDbContext<AppDbContext>(options =>
